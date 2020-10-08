@@ -1,0 +1,20 @@
+{
+  "name": "we-file-front-end",
+  "version": "1.0.0",
+  "description": "1. cd ./we-file\r 2. npm install\r 3. npm run serve\r 4. npm run build",
+  "main": "gulpfile.js",
+  "scripts": {
+    "init": "cd we-file && npm install",
+    "dev:front": "cd we-file && npm run serve",
+    "dev:admin": "cd we-file-admin && npm run dev",
+    "gulp:front": "gulp build:front",
+    "gulp:admin": "gulp build:admin",
+    "gulp:all": "gulp build:all"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  }
+}
