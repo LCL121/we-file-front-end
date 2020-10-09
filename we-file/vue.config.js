@@ -25,7 +25,8 @@ module.exports = {
     resolve: {
       alias: {
         assets: path.join(__dirname, 'src/assets'),
-        utils: path.join(__dirname, 'src/utils')
+        utils: path.join(__dirname, 'src/utils'),
+        style: path.join(__dirname, 'src/style')
       }
     }
   }
