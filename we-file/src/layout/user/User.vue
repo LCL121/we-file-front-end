@@ -1,19 +1,100 @@
 <template>
   <div class="user">
-    user
-    <router-view />
+    <div class="user-title">
+      <div
+        class="nav-button"
+        @click="showNav"
+      >
+        <svg
+          class="icon"
+          aria-hidden="true"
+        >
+          <use xlink:href="#icon-daohang"></use>
+        </svg>
+      </div>
+      WeFile
+    </div>
+    <div class="user-main">
+      <transition name="nav-transition">
+        <nav
+          class="user-nav"
+          v-if="navShow"
+        >
+          <router-link
+            to="/user/user-home"
+            :class="{selected: index === 0}"
+            @click.native="changeSeleted(0)"
+          >我的云盘</router-link>
+          <router-link
+            to="/user/user-details"
+            :class="{selected: index === 1}"
+            @click.native="changeSeleted(1)"
+          >个人中心</router-link>
+          <router-link
+            to="/"
+            @click.native="signOut"
+          >退出登录</router-link>
+        </nav>
+      </transition>
+      <div class="user-main-view">
+        <router-view />
+      </div>
+    </div>
+    <div
+      class="user-mask"
+      v-if="navShow"
+      @click="hiddenNav"
+    ></div>
   </div>
 </template>
 
 <script>
+import store from '@/store'
+import { mapState } from 'vuex'
+
 export default {
   name: 'User',
   data () {
     return {
+      index: 0,
+      navShow: !store.state.base.isMobileView
     }
+  },
+  computed: {
+    ...mapState({
+      isMobileView: state => state.base.isMobileView
+    })
+  },
+  methods: {
+    changeSeleted (item) {
+      this.index = item
+      !this.isMobileView || (this.navShow = false)
+    },
+    showNav () {
+      this.navShow = true
+    },
+    hiddenNav () {
+      this.navShow = false
+    },
+    signOut () {
+      store.dispatch('user/signOut')
+    }
+  },
+  beforeRouteEnter (to, from, next) {
+    if (store.state.user.email === '') {
+      next('/')
+    }
+    next()
   }
 }
 </script>
 
 <style scoped lang="scss">
+@import "./style/transition.scss";
+@import "./style/pc.scss";
+@import "./style/mobile.scss";
+
+.user {
+  min-height: 100vh;
+}
 </style>

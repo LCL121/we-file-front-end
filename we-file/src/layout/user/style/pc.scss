@@ -1,0 +1,61 @@
+// > 500px
+@import '@/style/index.scss';
+
+$title-height: px2rem(60);
+$nav-width: px2rem(280);
+$default-bgcolor: #f8f8f8;
+$selected-bgcolor: #fff;
+
+@media screen and (min-width:501px) {
+  .user {
+    display: flex;
+    flex-direction: column;
+
+    .user-title {
+      @include textCenter($title-height);
+      box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .05);
+      cursor: default;
+
+      .nav-button {
+        display: none;
+      }
+    }
+
+    .user-main {
+      flex: 1;
+      height: calc(100vh - #{$title-height});
+      display: flex;
+
+      .user-nav {
+        width: $nav-width;
+        background: $default-bgcolor;
+        padding-top: px2rem(200);
+        box-sizing: border-box;
+
+        .selected {
+          background: $selected-bgcolor;
+        }
+
+        a {
+          display: block;
+          width: 80%;
+          @include textCenter(px2rem(40));
+          margin: px2rem(15) auto;
+          border-radius: px2rem(4);
+        }
+
+        a:hover {
+          background: $selected-bgcolor;
+        }
+      }
+
+      .user-main-view {
+        flex: 1;
+      }
+    }
+    
+    .user-mask {
+      display: none;
+    }
+  }
+}

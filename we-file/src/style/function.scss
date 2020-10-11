@@ -1,0 +1,5 @@
+$baseFontSize: 100;
+
+@function px2rem($px) {
+  @return $px / $baseFontSize * 1rem;
+}

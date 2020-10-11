@@ -1,0 +1,9 @@
+.nav-transition-enter-active,
+.nav-transition-leave-active {
+  transition: transform .8s;
+}
+
+.nav-transition-enter,
+.nav-transition-leave-to {
+  transform: translateX(-100vw);
+}

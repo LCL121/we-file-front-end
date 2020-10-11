@@ -1,7 +1,99 @@
+@import './mixin.scss';
+@import './variables.scss';
+@import './function.scss';
+
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
   border: 0;
   vertical-align: baseline;
+}
+
+body {
+  font-size: 18px;
+}
+
+button {
+  font-size: 16px;
+}
+
+@media screen and (max-width:400px) {
+  body {
+    font-size: 16px;
+  }
+}
+
+@media screen and (max-width:321px) {
+  body {
+    font-size: 15px;
+  }
+  
+  button {
+    font-size: 15px;
+  }
+}
+
+a {
+  text-decoration: none;
+  color: #3c3c3c;
+}
+
+input,
+button {
+  border: none;
+  outline: none;
+}
+
+input {
+  font-size: 13px;
+}
+
+// 表单输入框
+.fm-input {
+  width: 80%;
+  height: px2rem(40);
+  margin: px2rem(15) auto;
+  position: relative;
+  input {
+    width: 100%;
+    height: px2rem(40);
+    padding: px2rem(5) px2rem(20);
+    color: #000;
+    border: px2rem(1) solid #e5e5e5;
+    border-radius: px2rem(4);
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+  }
+}
+
+// 表单按钮
+.fm-button {
+  width: 80%;
+  height: px2rem(40);
+  margin: px2rem(15) auto;
+  position: relative;
+  button {
+    width: 100%;
+    height: px2rem(40);
+    padding: px2rem(5) px2rem(20);
+    color: #fff;
+    border-radius: px2rem(4);
+    box-sizing: border-box;
+    background-color: #f40;
+    cursor: pointer;
+  }
+}
+
+// icon 引入
+.icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
 }

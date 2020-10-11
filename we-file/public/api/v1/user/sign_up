@@ -1,0 +1,8 @@
+{
+  "email": "string",
+  "name": "string",
+  "profile": "string",
+  "role_id": 0,
+  "role_name": "string",
+  "user_id": 0
+}

@@ -1,0 +1,75 @@
+// <= 500px
+@import '@/style/index.scss';
+
+$title-height: px2rem(60);
+$nav-width: px2rem(420);
+$title-bgcolor: #fafafb;
+$nav-bgcolor: #fff;
+$mask-bgcolr: rgba(0, 0, 0, .5);
+$default-color: #8e9aa5;
+$selected-color: #000;
+
+@media screen and (max-width:500px) {
+  .user {
+    display: flex;
+    flex-direction: column;
+
+    .user-title {
+      position: relative;
+      @include textCenter($title-height);
+      background: $title-bgcolor;
+      cursor: default;
+      padding: 0 px2rem(50);
+      box-sizing: border-box;
+
+      .nav-button {
+        position: absolute;
+        left: px2rem(50);
+        cursor: pointer;
+      }
+    }
+
+    .user-main {
+      .user-nav {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: $nav-width;
+        height: 100vh;
+        background: $nav-bgcolor;
+        z-index: 100;
+        padding-top: px2rem(200);
+        box-sizing: border-box;
+
+        .selected {
+          color: $selected-color;
+        }
+
+        a {
+          display: block;
+          width: 80%;
+          @include textCenter(px2rem(40));
+          margin: px2rem(15) auto;
+          border-radius: px2rem(4);
+          color: $default-color;
+        }
+
+        a:hover {
+          color: $selected-color;
+        }
+      }
+
+      .user-main-view {
+        height: calc(100vh - #{$title-height});
+        flex: 1;
+      }
+    }
+
+    .user-mask {
+      position: absolute;
+      background: $mask-bgcolr;
+      width: 100vw;
+      height: 100vh;
+    }
+  }
+}
