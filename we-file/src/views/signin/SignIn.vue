@@ -1,5 +1,5 @@
 <template>
-  <form class="sign-in">
+  <form class="sign-in" @submit.prevent="">
     <div class="fm-input">
       <label for="email"></label>
       <input
@@ -27,10 +27,7 @@
       >
     </div>
     <div class="fm-button">
-      <button
-        type="submit"
-        @click="signin"
-      >登录</button>
+      <button @click="signin">登录</button>
     </div>
   </form>
 </template>

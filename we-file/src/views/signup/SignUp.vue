@@ -1,5 +1,5 @@
 <template>
-  <form class="sign-up">
+  <form class="sign-up" @submit.prevent="">
     <div class="fm-input">
       <label for="name"></label>
       <input
