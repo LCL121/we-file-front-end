@@ -5,6 +5,8 @@ import store from './store'
 import './directive'
 import './icon/iconfont'
 
+import './utils/tryAPI'
+
 Vue.config.productionTip = false
 
 // width 500px 为准 并以其区分mobile 和 pc
