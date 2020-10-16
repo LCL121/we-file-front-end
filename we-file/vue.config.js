@@ -33,7 +33,7 @@ module.exports = {
             .catch(e => {
               console.log(chalk.red('get 出错！'))
               const data = e.response.data
-              console.log(chalk.red(data))
+              console.log(chalk.red(JSON.stringify(data)))
               res.send(data)
             })
         } else if (req.method === 'POST') {
@@ -60,7 +60,7 @@ module.exports = {
             .catch(e => {
               console.log(chalk.red('post 出错！'))
               const data = e.response.data
-              console.log(chalk.red(data))
+              console.log(chalk.red(JSON.stringify(data)))
               res.send(data)
             })
         }
