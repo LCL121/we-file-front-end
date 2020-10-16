@@ -5,10 +5,17 @@ import store from './store'
 import './directive'
 import './icon/iconfont'
 
+if (process.env.VUE_APP_TESTAPI) {
+  import('./utils/tryAPI')
+    .then((module) => {
+      console.log('已开启Test API 模式！')
+      module.tryAPI()
+    })
+}
+
 Vue.config.productionTip = false
 
 // width 500px 为准 并以其区分mobile 和 pc
-// document.documentElement.style.fontSize = '100px'
 if (document.documentElement.clientWidth > 500) {
   document.documentElement.style.fontSize = '100px'
 } else {
