@@ -26,9 +26,16 @@ fileWorker.onmessage = function (e) {
       start = end
       end = end + piece
     }
-    chunks.forEach((chunk, index) => {
-      console.log(chunk)
-    })
+    // chunks.forEach(() => {
+    //   fetch('https://mimg.127.net/p/font/js6/v1/neteasefont-regular.woff')
+    //     .then(res => {
+    //       console.log(res)
+    //     })
+    // })
+    sendRequest(chunks)
+      .then(() => {
+        console.log('结束')
+      })
   } else {
     console.log('不需要切片')
   }
