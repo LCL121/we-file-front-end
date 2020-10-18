@@ -36,6 +36,9 @@ fileWorker.onmessage = function (e) {
       .then(() => {
         console.log('结束')
       })
+      .catch(() => {
+        console.log('有问题，结束')
+      })
   } else {
     console.log('不需要切片')
   }
