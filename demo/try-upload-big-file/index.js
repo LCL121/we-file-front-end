@@ -26,18 +26,28 @@ fileWorker.onmessage = function (e) {
       start = end
       end = end + piece
     }
+
     // chunks.forEach(() => {
     //   fetch('https://mimg.127.net/p/font/js6/v1/neteasefont-regular.woff')
     //     .then(res => {
     //       console.log(res)
     //     })
     // })
-    sendRequest(chunks)
+
+    // sendRequest(chunks)
+    //   .then(() => {
+    //     console.log('结束')
+    //   })
+    //   .catch(() => {
+    //     console.log('有问题，结束')
+    //   })
+
+    sendRequest2(chunks)
       .then(() => {
         console.log('结束')
       })
       .catch(() => {
-        console.log('有问题，结束')
+        console.error('有问题，结束')
       })
   } else {
     console.log('不需要切片')

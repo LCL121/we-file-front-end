@@ -3,7 +3,7 @@ const START = 'start'
 const ERROR = 'error'
 const END = 'end'
 
-const sendRequest = (chunks, max = 4) => {
+const sendRequest2 = (chunks, max = 4) => {
   return new Promise((resolve, reject) => {
     const len = chunks.length
     let counter = 0
@@ -41,7 +41,6 @@ const sendRequest = (chunks, max = 4) => {
           })
           .catch(e => {
             console.log(e, idx)
-            // forms[idx].status = WAIT
             if (retryArr[idx] < 4) {
               forms[idx].status = WAIT
               retryArr[idx]++
@@ -49,6 +48,7 @@ const sendRequest = (chunks, max = 4) => {
               forms[idx].status = ERROR
               counter++
               console.log(`第${idx}切片停止重传`)
+              reject()
             }
           })
           .finally(() => {
@@ -60,7 +60,10 @@ const sendRequest = (chunks, max = 4) => {
                 reject()
               }
             } else {
-              start()
+              // 有一个状态为ERROR就取消重传
+              if (forms.every(item => item.status !== ERROR)) {
+                start()
+              }
             }
           })
       }
