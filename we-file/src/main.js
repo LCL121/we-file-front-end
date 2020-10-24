@@ -10,6 +10,7 @@ if (process.env.VUE_APP_TESTAPI) {
     .then((module) => {
       console.log('已开启Test API 模式！')
       module.tryAPI()
+      // module.tryMultipartUpload()
     })
 }
 

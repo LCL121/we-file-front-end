@@ -67,13 +67,28 @@ module.exports = {
       })
     }
   },
-  chainWebpack: (config) => {
+  parallel: false,
+  chainWebpack: config => {
     config
       .plugin('html')
       .tap((args) => {
         args[0].title = 'WeFile'
         return args
       })
+
+    config.module
+      .rule('worker')
+      .test(/\.worker\.js$/)
+      .use('worker-loader')
+      .loader('worker-loader')
+      .options({
+        inline: 'fallback',
+        filename: '[name].[contenthash].worker.js'
+      })
+
+    config.module.rule('js').exclude.add(/\.worker\.js$/)
+
+    config.output.globalObject('this')
 
     if (process.env.NODE_ENV === 'development') {
       config.module

@@ -1,8 +1,19 @@
 import axios from 'axios'
 import qs from 'qs'
+import FileWorker from './tryFileWorker.worker.js'
 
+const downloadFile = (name, blob) => {
+  const a = document.createElement('a')
+  a.download = name
+  a.href = blob
+  a.click()
+}
+
+// 第一波：基本API测试
 export const tryAPI = async () => {
-  // 测试role/all 接口
+  console.log('开始调用 tryAPI 函数')
+
+  // // 测试role/all 接口
   // await axios.get('/api/v1/role/all')
   //   .then(res => {
   //     console.log(res)
@@ -19,7 +30,7 @@ export const tryAPI = async () => {
       userId = BigInt(res.data.user_id)
     })
 
-  // 测试注册接口
+  // // 测试注册接口
   // await axios.post('/api/v1/user/sign_up', qs.stringify({
   //   email: 'string',
   //   name: 'string',
@@ -39,7 +50,8 @@ export const tryAPI = async () => {
     })
   console.log(directory)
 
-  const file1 = directory.files[0]
+  const file1 = directory.files[1]
+  console.log('fileId: ', BigInt(file1.file_id))
 
   // 测试获取下载地址接口
   let downloadAddress = ''
@@ -53,21 +65,39 @@ export const tryAPI = async () => {
 
   console.log(downloadAuthorization)
 
-  // 测试下载功能
+  // // 测试下载功能
+  // // 使用fetch
+  // await fetch(`${downloadAddress}/api/v1/download`, {
+  //   method: 'GET',
+  //   headers: {
+  //     authorization: downloadAuthorization
+  //   }
+  // })
+  //   .then(res => res.blob())
+  //   .then(data => {
+  //     const blobURL = window.URL.createObjectURL(data)
+  //     downloadFile(file1.file_name, blobURL)
+  //   })
+
+  // 使用axios
   await axios.request({
     url: `${downloadAddress}/api/v1/download`,
     method: 'GET',
     headers: {
       authorization: downloadAuthorization
-    }
+    },
+    responseType: 'blob'
   })
     .then(res => {
-      console.log(res)
-      console.log(res.headers)
-      console.log(res.data)
+      // console.log(res)
+      // console.log(res.headers)
+      // console.log(res.data)
+      const blob = new Blob([res.data])
+      const blobURL = window.URL.createObjectURL(blob)
+      downloadFile(file1.file_name, blobURL)
     })
 
-  // 测试上传功能
+  // // 测试上传功能
   // const inputDom = document.createElement('input')
   // inputDom.accept = 'image/png,image/gif,image/jpeg,.txt'
   // inputDom.type = 'file'
@@ -78,7 +108,7 @@ export const tryAPI = async () => {
   //   param.append('file', file)// 通过append向form对象添加数据
   //   console.log(param.get('file')) // FormData私有类对象，访问不到，通过get判断值是否传进去
 
-  // 测试获取上传地址接口
+  //   // 测试获取上传地址接口
   //   let uploadAddress = ''
   //   let uploadAuthorization = ''
   //   await axios.get(`/api/v1/upload_address/${userId}?file_name=${file.name}&directory=/`)
@@ -107,4 +137,44 @@ export const tryAPI = async () => {
   //       console.log(JSON.stringify(data))
   //     })
   // }
+}
+
+// 第二波：大文件分块上传API测试
+export const tryMultipartUpload = async () => {
+  console.log('开始调用 tryMultipartUpload 函数')
+
+  // 测试登录接口
+  let userId = 0
+  await axios.post('/api/v1/user/sign_in', qs.stringify({
+    email: 'we@qq.com',
+    password: '123456789'
+  }))
+    .then(res => {
+      console.log(res.data)
+      userId = BigInt(res.data.user_id)
+    })
+
+  const inputDom = document.createElement('input')
+  inputDom.accept = 'image/png,image/gif,image/jpeg,.zip,.txt,.mp4'
+  inputDom.type = 'file'
+  document.body.appendChild(inputDom)
+  inputDom.onchange = async function (e) {
+    const file = e.target.files[0]
+    const fileWorker = new FileWorker()
+    const param = new FormData() // 创建form对象
+    param.append('file', file)// 通过append向form对象添加数据
+    console.log(param.get('file')) // FormData私有类对象，访问不到，通过get判断值是否传进去
+
+    // 测试获取上传地址接口
+    let uploadAddress = ''
+    let uploadAuthorization = ''
+    await axios.get(`/api/v1/upload_address/${userId}?file_name=${file.name}&directory=/`)
+      .then(res => {
+        console.log(res)
+        uploadAddress = res.data.address
+        uploadAuthorization = res.headers.authorization
+      })
+
+    fileWorker.postMessage({ file, uploadAddress, uploadAuthorization })
+  }
 }
