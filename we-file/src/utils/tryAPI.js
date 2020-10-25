@@ -50,7 +50,7 @@ export const tryAPI = async () => {
     })
   console.log(directory)
 
-  const file1 = directory.files[1]
+  const file1 = directory.files[4]
   console.log('fileId: ', BigInt(file1.file_id))
 
   // 测试获取下载地址接口

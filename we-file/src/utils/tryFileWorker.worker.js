@@ -119,6 +119,11 @@ self.addEventListener('message', function (e) {
                 })
             }
           })
+          .catch(e => {
+            console.log(e)
+            console.log(e.response)
+            console.log(e.response.data)
+          })
       })
     }
   }
