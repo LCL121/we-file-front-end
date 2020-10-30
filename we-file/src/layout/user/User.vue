@@ -31,7 +31,7 @@
             @click.native="changeSeleted(1)"
           >个人中心</router-link>
           <router-link
-            to="/"
+            to=""
             @click.native="signOut"
           >退出登录</router-link>
         </nav>
@@ -78,11 +78,12 @@ export default {
     },
     signOut () {
       store.dispatch('user/signOut')
+      this.$router.push('/')
     }
   },
   beforeRouteEnter (to, from, next) {
-    if (store.state.user.email === '') {
-      next('/')
+    if (store.state.user.userId === '') {
+      next('/signin')
     }
     next()
   }

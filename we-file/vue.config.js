@@ -15,12 +15,12 @@ module.exports = {
 
       app.all(/^\/api\/v1\/.*/, (req, res) => {
 
-        console.log(chalk.blue(`${req.method} to: http://www.wefile.com:8080${req.url}`))
+        console.log(chalk.blue(`${req.method} to: http://www.wefile.com:8070${req.url}`))
 
         if (req.method === 'OPTIONS') {
           res.sendStatus(200);
         } else if (req.method === 'GET') {
-          axios.get(`http://www.wefile.com:8080${req.url}`, {
+          axios.get(`http://www.wefile.com:8070${req.url}`, {
             headers: req.headers
           })
             .then((tempRes) => {
@@ -39,7 +39,7 @@ module.exports = {
         } else if (req.method === 'POST') {
           console.log(req.body)
           axios.request({
-            url: `http://www.wefile.com:8080${req.url}`,
+            url: `http://www.wefile.com:8070${req.url}`,
             method: 'post',
             headers: req.headers,
             data: qs.stringify(req.body)

@@ -44,11 +44,16 @@
 </template>
 
 <script>
+import store from '@/store'
+
 export default {
   name: 'UserHome',
   data () {
     return {
     }
+  },
+  mounted () {
+    console.log(store.state.user.userId)
   }
 }
 </script>

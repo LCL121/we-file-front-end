@@ -18,10 +18,20 @@
         <router-view />
       </div>
     </div>
+    <div class="stars">
+      <div
+        class="star"
+        v-for="item in getStars()"
+        :key="item.id"
+        :style="item.style"
+      ></div>
+    </div>
   </div>
 </template>
 
 <script>
+import store from '@/store'
+
 export default {
   name: 'Home',
   data () {
@@ -32,9 +42,37 @@ export default {
   methods: {
     changeSeleted (item) {
       this.index = item
+    },
+    randomDistance (max, min) {
+      var distance = Math.floor(Math.random() * (max - min + 1) + min)
+      return distance
+    },
+    getStars () {
+      const list = []
+      for (let i = 0; i < 50; i++) {
+        list.push({
+          id: i,
+          style: {
+            top: `${this.randomDistance(document.documentElement.clientHeight / 2, -100)}px`,
+            left: `${this.randomDistance(100, document.documentElement.clientWidth)}px`,
+            animationDelay: (i % 6 === 0) ? '0s' : `${i * 0.8}s`
+          }
+        })
+      }
+      return list
     }
   },
   mounted () {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+    if (userInfo) {
+      store.commit('user/SET_EMAIL', userInfo.email)
+      store.commit('user/SET_NAME', userInfo.name)
+      store.commit('user/SET_PROFILE', userInfo.profile)
+      store.commit('user/SET_ROLE_ID', userInfo.role_id)
+      store.commit('user/SET_ROLE_NAME', userInfo.role_name)
+      store.commit('user/SET_USER_ID', userInfo.user_id)
+      this.$router.push({ path: '/user' })
+    }
     const fullPath = this.$route.fullPath
     if (fullPath === '/signin') {
       this.index = 0
@@ -47,6 +85,7 @@ export default {
 
 <style lang="scss" scoped>
 @import "@/style/index.scss";
+@import "./style/star.scss";
 
 $homeCenter: px2rem(380);
 
@@ -55,12 +94,14 @@ $homeCenter: px2rem(380);
 }
 
 .home {
-  background: gray;
+  background: linear-gradient(rgba(0, 108, 172, 1), rgba(0, 122, 195, 0.7));
   min-height: 100vh;
+  position: relative;
   display: flex;
   flex-direction: column;
 
   h1 {
+    color: #fff;
     margin: 0;
     padding-top: px2rem(20);
     cursor: default;
@@ -77,7 +118,7 @@ $homeCenter: px2rem(380);
       width: $homeCenter;
       padding: px2rem(25);
       box-sizing: border-box;
-      background: hsla(0, 0%, 100%, 0.7);
+      background: hsla(0, 0%, 100%, 0.8);
 
       nav {
         display: flex;

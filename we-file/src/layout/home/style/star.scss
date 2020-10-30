@@ -1,0 +1,39 @@
+.star::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, .8);
+  position: absolute;
+  left: -102px;
+  top: -2px;
+  border-radius: 50%;
+}
+
+.star {
+  display: block;
+  width: 0;
+  height: 0;
+  border: solid;
+  border-width: 2px 0 2px 100px;
+  border-color: transparent transparent transparent rgba(255, 255, 255, .5);
+  position: absolute;
+  top: 0;
+  left: 50vw;
+  animation: star 2s linear infinite backwards;
+}
+
+@keyframes star {
+  0% {
+    opacity: 0;
+    transform: rotate(-45deg) scale(0.5) translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 1;
+    transform: rotate(-45deg) translate3d(-200px, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-45deg) scale(1.5) translate3d(-300px, 0, 0);
+  }
+}
