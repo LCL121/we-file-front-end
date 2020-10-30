@@ -1,6 +1,30 @@
 <template>
   <div class="user-home">
-    <div class="user-home-nav">user home</div>
+    <div class="user-home-nav">
+      <div class="user-home-buttons">
+        <button
+          v-for="(item, index) in buttonsIcon"
+          :key="index"
+          class="user-home-button-icon"
+          @click="item.click"
+        >
+          <svg
+            class="icon"
+            aria-hidden="true"
+            v-html="item.svg"
+          >
+          </svg>
+          {{item.text}}
+        </button>
+        <input
+          ref="input"
+          type="file"
+          style="display: none;"
+        >
+      </div>
+      <div class="bread-crumb"></div>
+      <div class="menu-list"></div>
+    </div>
     <div class="user-home-list">
       <br>
       <br>
@@ -45,29 +69,106 @@
 
 <script>
 import store from '@/store'
+import axios from 'axios'
 
 export default {
   name: 'UserHome',
   data () {
     return {
+      buttonsIcon: [
+        {
+          svg: '<use xlink:href="#icon-shangchuan"></use>',
+          text: '上传',
+          click: this.upload
+        },
+        {
+          svg: '<use xlink:href="#icon-xinjianwenjianjia"></use>',
+          text: '新建文件夹',
+          click: this.createFolder
+        }
+      ],
+      fileList: []
+    }
+  },
+  methods: {
+    upload () {
+      console.log('upload')
+      this.$refs.input.click()
+    },
+    createFolder () {
+      console.log('createFolder')
+    },
+    signOut () {
+      store.dispatch('user/signOut')
+      this.$router.push('/')
+    },
+    getFileList () {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+      axios.get(`/api/v1/file_list/${store.state.user.userId}?directory=/`)
+        .then(res => {
+          console.log(res.status)
+          const data = res.data
+          if (data.message) {
+            if (data.message === 'valid session') {
+              this.signOut()
+            }
+          }
+          const directory = res.data
+          this.fileList = directory.files
+          console.log(directory)
+        })
+    },
+    initFileInput () {
+      const userId = store.state.user.userId
+      this.$refs.input.onchange = async function (e) {
+        const file = e.target.files[0]
+        const param = new FormData() // 创建form对象
+        param.append('file', file)// 通过append向form对象添加数据
+        console.log(param.get('file')) // FormData私有类对象，访问不到，通过get判断值是否传进去
+
+        let uploadAddress = ''
+        let uploadAuthorization = ''
+        await axios.get(`/api/v1/upload_address/${userId}?file_name=${file.name}&directory=/`)
+          .then(res => {
+            console.log(res)
+            uploadAddress = res.data.address
+            uploadAuthorization = res.headers.authorization
+          })
+
+        const url = `${uploadAddress}/api/v1/upload`
+        console.log(url, uploadAuthorization)
+        axios.request({
+          url,
+          method: 'POST',
+          headers: {
+            authorization: uploadAuthorization,
+            'Content-Type': 'multipart/form-data'
+          },
+          data: param
+        })
+          .then(res => {
+            console.log(res)
+          })
+          .catch((e) => {
+            const data = e.response.data
+            console.log(JSON.stringify(data))
+          })
+      }
     }
   },
   mounted () {
-    console.log(store.state.user.userId)
+    this.getFileList()
+    this.initFileInput()
   }
 }
 </script>
 
 <style scoped lang="scss">
 @import "@/style/index.scss";
-
-$nav-height: px2rem(100);
+@import "./style/pc.scss";
 
 .user-home {
   height: 100%;
-  .user-home-nav {
-    height: $nav-height;
-  }
   .user-home-list {
     height: calc(100% - #{$nav-height});
     overflow-y: auto;

@@ -1,0 +1,41 @@
+@import '@/style/index.scss';
+
+$nav-height: px2rem(105);
+$white: #fff;
+$blue: #09AAFF;
+
+.user-home-nav {
+  height: $nav-height;
+  display: flex;
+  flex-direction: column;
+  .user-home-buttons {
+    height: px2rem(55);
+    padding: px2rem(11) px2rem(10);
+    box-sizing: border-box;
+    .user-home-button-icon {
+      height: px2rem(33);
+      min-width: px2rem(84);
+      font-size: 13px;
+      margin: 0 px2rem(5);
+      vertical-align: baseline;
+      border-radius: px2rem(4);
+      padding: 0 px2rem(10);
+      cursor: pointer;
+    }
+    .user-home-button-icon:nth-child(1) {
+      background: $blue;
+      color: $white;
+    }
+    .user-home-button-icon:nth-child(2) {
+      background: $white;
+      border: 1px solid $blue;
+      color: $blue;
+    }
+  }
+  .bread-crumb {
+    height: px2rem(16);
+  }
+  .menu-list {
+    flex: 1;
+  }
+}
