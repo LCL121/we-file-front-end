@@ -1,5 +1,12 @@
 <template>
-  <form class="sign-up" @submit.prevent="">
+  <form
+    class="sign-up"
+    @submit.prevent=""
+  >
+    <p
+      v-if="message"
+      class="home-message"
+    >{{message}}</p>
     <div class="fm-input">
       <label for="name"></label>
       <input
@@ -12,6 +19,7 @@
         v-focus
         ref="name"
         v-model="name"
+        @blur="clearMessage"
       >
     </div>
     <div class="fm-input">
@@ -25,6 +33,7 @@
         required
         ref="password"
         v-model="password"
+        @blur="clearMessage"
       >
     </div>
     <div class="fm-input">
@@ -37,6 +46,7 @@
         required
         ref="email"
         v-model="email"
+        @blur="clearMessage"
       >
     </div>
     <div class="fm-input code-input">
@@ -48,6 +58,7 @@
         autocomplete
         ref="code"
         v-model="code"
+        @blur="clearMessage"
       >
       <button class="code-button">获取验证码</button>
     </div>
@@ -67,7 +78,8 @@ export default {
       name: 'lcl',
       password: '123abcABC',
       email: '1391436522@qq.com',
-      code: ''
+      code: '',
+      message: ''
     }
   },
   methods: {
@@ -84,15 +96,22 @@ export default {
       return true
       // return this.$refs.code.validity.valid
     },
-    async signUp () {
+    clearMessage () {
       if (
         !this.nameState() ||
         !this.emailState() ||
         !this.passwordState() ||
         !this.codeState()
       ) {
-        return
+        this.message = '请按格式输入信息'
+        return false
+      } else {
+        this.message = ''
+        return true
       }
+    },
+    async signUp () {
+      if (!this.clearMessage()) return
       try {
         const { data, status } = await store.dispatch('user/signUp', {
           email: this.email,
@@ -100,11 +119,19 @@ export default {
           password: this.password,
           verify_code: this.code
         })
-        if (status === 200) {
-          this.$router.push({ path: '/user' })
+        if (status === 200 && store.state.user.userId !== '') {
+          if (data.message) {
+            console.log(data.message)
+            this.message = data.message
+          } else {
+            this.$router.push({ path: '/user' })
+          }
+        } else {
+          this.message = data.message
         }
       } catch (err) {
         console.log(err)
+        this.message = '发生异常错误，请检查网络连通情况'
       }
     }
   }

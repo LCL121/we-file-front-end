@@ -30,6 +30,8 @@
 </template>
 
 <script>
+import store from '@/store'
+
 export default {
   name: 'Home',
   data () {
@@ -61,6 +63,16 @@ export default {
     }
   },
   mounted () {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+    if (userInfo) {
+      store.commit('user/SET_EMAIL', userInfo.email)
+      store.commit('user/SET_NAME', userInfo.name)
+      store.commit('user/SET_PROFILE', userInfo.profile)
+      store.commit('user/SET_ROLE_ID', userInfo.role_id)
+      store.commit('user/SET_ROLE_NAME', userInfo.role_name)
+      store.commit('user/SET_USER_ID', userInfo.user_id)
+      this.$router.push({ path: '/user' })
+    }
     const fullPath = this.$route.fullPath
     if (fullPath === '/signin') {
       this.index = 0
@@ -89,6 +101,7 @@ $homeCenter: px2rem(380);
   flex-direction: column;
 
   h1 {
+    color: #fff;
     margin: 0;
     padding-top: px2rem(20);
     cursor: default;

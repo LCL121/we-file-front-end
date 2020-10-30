@@ -1,5 +1,6 @@
 <template>
   <form class="sign-in" @submit.prevent="">
+    <p v-if="message" class="home-message">{{message}}</p>
     <div class="fm-input">
       <label for="email"></label>
       <input
@@ -11,6 +12,7 @@
         required
         ref="email"
         v-model="email"
+        @blur="clearMessage"
       >
     </div>
     <div class="fm-input">
@@ -24,6 +26,7 @@
         ref="password"
         autocomplete
         v-model="password"
+        @blur="clearMessage"
       >
     </div>
     <div class="fm-button">
@@ -33,7 +36,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import store from '@/store'
 
 export default {
@@ -41,7 +43,8 @@ export default {
   data () {
     return {
       email: '1391436522@qq.com',
-      password: '123abcABC'
+      password: '123abcABC',
+      message: ''
     }
   },
   methods: {
@@ -51,23 +54,35 @@ export default {
     passwordState () {
       return this.$refs.password.validity.valid
     },
-    async signin () {
-      if (
-        !this.emailState() ||
-        !this.passwordState()
-      ) {
-        return
+    clearMessage () {
+      if (!this.emailState() || !this.passwordState()) {
+        this.message = '请按格式输入信息'
+        return false
+      } else {
+        this.message = ''
+        return true
       }
+    },
+    async signin () {
+      if (!this.clearMessage()) return
       try {
         const { data, status } = await store.dispatch('user/signIn', {
           email: this.email,
           password: this.password
         })
-        if (status === 200) {
-          this.$router.push({ path: '/user' })
+        if (status === 200 && store.state.user.userId !== '') {
+          if (data.message) {
+            console.log(data.message)
+            this.message = data.message
+          } else {
+            this.$router.push({ path: '/user' })
+          }
+        } else {
+          this.message = data.message
         }
       } catch (err) {
         console.log(err)
+        this.message = '发生异常错误，请检查网络连通情况'
       }
     }
   }
