@@ -1,4 +1,4 @@
-// <= 500px
+// <= 800px
 @import '@/style/index.scss';
 
 $title-height: px2rem(60);
@@ -9,7 +9,7 @@ $mask-bgcolr: rgba(0, 0, 0, .5);
 $default-color: #8e9aa5;
 $selected-color: #000;
 
-@media screen and (max-width:500px) {
+@media screen and (max-width:800px) {
   .user {
     display: flex;
     flex-direction: column;

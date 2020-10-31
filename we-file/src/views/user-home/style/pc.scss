@@ -1,41 +1,96 @@
 @import '@/style/index.scss';
 
-$nav-height: px2rem(105);
+$nav-height: px2rem(110);
+$buttons-height: px2rem(55);
+$bread-height: px2rem(16);
 $white: #fff;
 $blue: #09AAFF;
+$nav-color: #888;
 
-.user-home-nav {
-  height: $nav-height;
-  display: flex;
-  flex-direction: column;
-  .user-home-buttons {
-    height: px2rem(55);
-    padding: px2rem(11) px2rem(10);
-    box-sizing: border-box;
-    .user-home-button-icon {
-      height: px2rem(33);
-      min-width: px2rem(84);
-      font-size: 13px;
-      margin: 0 px2rem(5);
-      vertical-align: baseline;
-      border-radius: px2rem(4);
-      padding: 0 px2rem(10);
-      cursor: pointer;
+@media screen and (min-width:801px) {
+  .user-home-nav {
+    height: $nav-height;
+    display: flex;
+    flex-direction: column;
+    color: $nav-color;
+    font-size: 12px;
+    cursor: default;
+
+    .user-home-buttons {
+      height: $buttons-height;
+      padding: px2rem(11) px2rem(10);
+      box-sizing: border-box;
+
+      .user-home-button-icon {
+        height: px2rem(33);
+        min-width: px2rem(84);
+        font-size: 13px;
+        margin: 0 px2rem(5);
+        vertical-align: baseline;
+        border-radius: px2rem(4);
+        padding: 0 px2rem(10);
+        cursor: pointer;
+      }
+
+      .user-home-button-icon:nth-child(1) {
+        background: $blue;
+        color: $white;
+      }
+
+      .user-home-button-icon:nth-child(2) {
+        background: $white;
+        border: 1px solid $blue;
+        color: $blue;
+      }
     }
-    .user-home-button-icon:nth-child(1) {
-      background: $blue;
-      color: $white;
+
+    .bread-crumb {
+      height: $bread-height;
+      padding-left: px2rem(16);
     }
-    .user-home-button-icon:nth-child(2) {
-      background: $white;
-      border: 1px solid $blue;
-      color: $blue;
+
+    .menu-list {
+      flex: 1;
+      display: flex;
+      border-bottom: 1px solid #f2f6fd;
+      box-sizing: border-box;
+
+      span {
+        flex: 1;
+        padding-left: px2rem(16);
+        line-height: $nav-height - $buttons-height - $bread-height;
+      }
+
+      span:hover {
+        background: #F4FBFF;
+        border-color: #CBEDFF;
+      }
     }
   }
-  .bread-crumb {
-    height: px2rem(16);
-  }
-  .menu-list {
-    flex: 1;
+
+  .user-home-list {
+    color: $nav-color;
+    font-size: 12px;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+
+    .user-home-item {
+      display: flex;
+      line-height: px2rem(44);
+      height: px2rem(44);
+      border-bottom: 1px solid #f2f6fd;
+      box-sizing: border-box;
+
+      span {
+        flex: 1;
+        padding-left: px2rem(16);
+      }
+
+      span:hover {
+        background: #F4FBFF;
+        border-color: #CBEDFF;
+      }
+    }
   }
 }
