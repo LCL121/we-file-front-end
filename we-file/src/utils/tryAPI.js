@@ -22,8 +22,8 @@ export const tryAPI = async () => {
   // 测试登录接口
   let userId = 0
   await axios.post('/api/v1/user/sign_in', qs.stringify({
-    email: 'we@qq.com',
-    password: '123456789'
+    email: '1391436522@qq.com',
+    password: '123abcABC'
   }))
     .then(res => {
       console.log(res.data)
@@ -50,7 +50,7 @@ export const tryAPI = async () => {
     })
   console.log(directory)
 
-  const file1 = directory.files[4]
+  const file1 = directory.files[2]
   console.log('fileId: ', BigInt(file1.file_id))
 
   // 测试获取下载地址接口

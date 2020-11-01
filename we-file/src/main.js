@@ -9,8 +9,8 @@ if (process.env.VUE_APP_TESTAPI) {
   import('./utils/tryAPI')
     .then((module) => {
       console.log('已开启Test API 模式！')
-      // module.tryAPI()
-      module.tryMultipartUpload()
+      module.tryAPI()
+      // module.tryMultipartUpload()
     })
 }
 

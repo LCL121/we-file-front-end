@@ -23,7 +23,11 @@
         >
       </div>
       <div class="bread-crumb">
-        全部文件
+        <router-link
+          :to="`/user/user-home?path=${item.path}`"
+          v-for="item in getBreadCrumb()"
+          :key="item.path"
+        >{{item.name}}</router-link>
       </div>
       <div class="menu-list">
         <span
@@ -36,7 +40,7 @@
       <div
         class="user-home-item"
         v-for="item in fileList"
-        :key="item.file_id"
+        :key="`${item.file_id}_${item.file_name}`"
       >
         <span>
           <svg
@@ -44,9 +48,25 @@
             aria-hidden="true"
             v-html="getFileIcon(item.is_directory, item.file_name)"
           ></svg>
-          {{item.file_name}}
+          <router-link
+            :to="`/user/user-home?path=${directory}${addSep()}${item.file_name}`"
+            class="file-name"
+            v-if="item.is_directory"
+          >{{item.file_name}}</router-link>
+          <span
+            class="file-name"
+            v-else
+          >{{item.file_name}}</span>
+          <svg
+            class="icon file-download"
+            aria-hidden="true"
+            @click="downloadFile(item.file_id, item.file_name)"
+            v-if="!item.is_directory"
+          >
+            <use xlink:href="#icon-xiazai"></use>
+          </svg>
         </span>
-        <span>{{getFileSize(item.file_size)}}</span>
+        <span>{{getFileSize(item.is_directory, item.file_size)}}</span>
         <span>{{getFileTime(item.upload_at)}}</span>
       </div>
     </div>
@@ -56,6 +76,7 @@
 <script>
 import store from '@/store'
 import axios from 'axios'
+import qs from 'qs'
 
 export default {
   name: 'UserHome',
@@ -70,12 +91,13 @@ export default {
         {
           svg: '<use xlink:href="#icon-xinjianwenjianjia"></use>',
           text: '新建文件夹',
-          click: this.createFolder
+          click: this.beforeCreateFolder
         }
       ],
       fileList: [],
       menuList: ['文件名', '大小', '修改日期'],
-      directory: '/'
+      directory: '/',
+      userId: store.state.user.userId
     }
   },
   methods: {
@@ -83,8 +105,28 @@ export default {
       console.log('upload')
       this.$refs.input.click()
     },
-    createFolder () {
-      console.log('createFolder')
+    getBreadCrumb () {
+      const temp = this.directory.split('/').filter(item => item !== '')
+      temp.unshift('')
+      const arr = []
+      const len = temp.length
+      for (let i = 0; i < len; i++) {
+        if (i === 0) {
+          arr[0] = {
+            path: '/',
+            name: '全部文件'
+          }
+        } else {
+          arr[i] = {
+            path: temp.slice(0, i + 1).join('/'),
+            name: temp[i]
+          }
+        }
+      }
+      return arr
+    },
+    addSep () {
+      return this.directory === '/' ? '' : '/'
     },
     signOut () {
       store.dispatch('user/signOut')
@@ -137,7 +179,8 @@ export default {
         }
       }
     },
-    getFileSize (fileSize) {
+    getFileSize (isDirectory, fileSize) {
+      if (isDirectory) return '-'
       const suffix = ['Byte', 'KB', 'M', 'G', 'T']
       let num = 0
       while (fileSize >= 1024) {
@@ -148,30 +191,37 @@ export default {
     },
     getFileList () {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'))
-      axios.get(`/api/v1/file_list/${store.state.user.userId}?directory=${this.directory}`)
+      axios.get(`/api/v1/file_list/${this.userId}?directory=${this.directory}`)
         .then(res => {
-          console.log(res.status)
           const data = res.data
           console.log(data)
           if (data.message) {
             if (data.message === 'valid session') {
               this.signOut()
+              return
             }
           }
-          this.fileList = data.files
+          this.fileList = data.files.sort((a, b) => {
+            if (a.is_directory && !b.is_directory) return -1
+            else return 1
+          })
+        })
+        .catch(e => {
+          console.log(e)
+          this.signOut()
         })
     },
     initFileInput () {
-      const userId = store.state.user.userId
       this.$refs.input.onchange = async (e) => {
         const file = e.target.files[0]
         const param = new FormData() // 创建form对象
         param.append('file', file)// 通过append向form对象添加数据
         console.log(param.get('file')) // FormData私有类对象，访问不到，通过get判断值是否传进去
 
+        // 获取上传地址接口
         let uploadAddress = ''
         let uploadAuthorization = ''
-        await axios.get(`/api/v1/upload_address/${userId}?file_name=${file.name}&directory=${this.directory}`)
+        await axios.get(`/api/v1/upload_address/${this.userId}?file_name=${file.name}&directory=${this.directory}`)
           .then(res => {
             console.log(res)
             uploadAddress = res.data.address
@@ -196,8 +246,74 @@ export default {
           .catch((e) => {
             console.log(e)
             console.log(e.response)
+            this.signOut()
           })
       }
+    },
+    downloadFileByA (name, blob) {
+      const a = document.createElement('a')
+      a.download = name
+      a.href = blob
+      a.click()
+    },
+    async downloadFile (fileId, fileName) {
+      // 获取下载地址接口
+      let downloadAddress = ''
+      let downloadAuthorization = ''
+      await axios.get(`/api/v1/download_address/${this.userId}?file_id=${BigInt(fileId)}&file_name=${fileName}&directory=${this.directory}`)
+        .then(res => {
+          console.log(res)
+          downloadAddress = res.data.address
+          downloadAuthorization = res.headers.authorization
+        })
+
+      console.log(downloadAuthorization)
+      // 使用axios
+      await axios.request({
+        url: `${downloadAddress}/api/v1/download`,
+        method: 'GET',
+        headers: {
+          authorization: downloadAuthorization
+        },
+        responseType: 'blob'
+      })
+        .then(res => {
+          const blob = new Blob([res.data])
+          const blobURL = window.URL.createObjectURL(blob)
+          this.downloadFileByA(fileName, blobURL)
+        })
+    },
+    beforeCreateFolder () {
+      const name = prompt('请输入文件名字', '新建文件夹')
+      if (name) {
+        this.createFolder(name)
+      }
+    },
+    createFolder (name) {
+      axios.post(`/api/v1/file_list/${this.userId}`, qs.stringify({
+        csrf_token: store.state.user.token,
+        directory: this.directory,
+        name
+      }))
+        .then(res => {
+          console.log(res)
+          this.getFileList()
+        })
+        .catch((e) => {
+          console.log(e)
+          console.log(e.response)
+          this.signOut()
+        })
+    }
+  },
+  watch: {
+    $route (to, from) {
+      const path = to.query.path
+      if (path) {
+        this.directory = path
+      }
+      this.getFileList()
+      this.initFileInput()
     }
   },
   mounted () {
@@ -214,11 +330,6 @@ export default {
 <style scoped lang="scss">
 @import "@/style/index.scss";
 @import "./style/pc.scss";
-
-.file-icon {
-  font-size: 30px;
-  vertical-align: middle;
-}
 
 .user-home {
   height: 100%;

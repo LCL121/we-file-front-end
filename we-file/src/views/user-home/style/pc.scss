@@ -46,7 +46,19 @@ $nav-color: #888;
 
     .bread-crumb {
       height: $bread-height;
-      padding-left: px2rem(16);
+      padding-right: px2rem(16);
+      
+      a {
+        color: $nav-color;
+        padding-left: px2rem(16);
+        position: relative;
+      }
+
+      a:nth-child(n+2)::before {
+        content: '>';
+        position: absolute;
+        left: px2rem(4);
+      }
     }
 
     .menu-list {
@@ -59,6 +71,15 @@ $nav-color: #888;
         flex: 1;
         padding-left: px2rem(16);
         line-height: $nav-height - $buttons-height - $bread-height;
+        box-sizing: border-box;
+      }
+
+      span:nth-child(1) {
+        min-width: px2rem(300);
+      }
+
+      span:nth-child(3) {
+        min-width: px2rem(150);
       }
 
       span:hover {
@@ -85,11 +106,48 @@ $nav-color: #888;
       span {
         flex: 1;
         padding-left: px2rem(16);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        box-sizing: border-box;
+
+        .file-icon {
+          font-size: 30px;
+          vertical-align: middle;
+        }
+
+        .file-name {
+          padding-left: px2rem(16);
+          color: $nav-color;
+        }
+        
+        .file-download {
+          font-size: 15px;
+          vertical-align: middle;
+          height: px2rem(44);
+          line-height: px2rem(44);
+          float: right;
+          cursor: pointer;
+          padding-right: px2rem(16);
+          opacity: 0;
+        }
+      }
+
+      span:nth-child(1) {
+        min-width: px2rem(300);
+      }
+
+      span:nth-child(3) {
+        min-width: px2rem(150);
       }
 
       span:hover {
         background: #F4FBFF;
         border-color: #CBEDFF;
+
+        .file-download {
+          opacity: 1;
+        }
       }
     }
   }

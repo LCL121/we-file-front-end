@@ -21,7 +21,7 @@
           v-show="navShow"
         >
           <router-link
-            to="/user/user-home"
+            :to="`/user/user-home?path=${userHomePath}`"
             :class="{selected: index === 0}"
             @click.native="changeSeleted(0)"
           >我的云盘</router-link>
@@ -57,13 +57,24 @@ export default {
   data () {
     return {
       index: 0,
-      navShow: true
+      navShow: true,
+      userHomePath: '/'
+    }
+  },
+  watch: {
+    $route (to, from) {
+      if (to.path === '/user/user-home') {
+        const path = this.$route.query.path
+        if (path) {
+          this.userHomePath = path
+        }
+      }
     }
   },
   methods: {
     changeSeleted (item) {
       this.index = item
-      this.navShow = false
+      if (document.documentElement.clientWidth < 800) this.navShow = false
     },
     showNav () {
       this.navShow = true
@@ -81,6 +92,14 @@ export default {
       next('/signin')
     }
     next()
+  },
+  mounted () {
+    if (this.$route.path === '/user/user-home') {
+      const path = this.$route.query.path
+      if (path) {
+        this.userHomePath = path
+      }
+    }
   }
 }
 </script>

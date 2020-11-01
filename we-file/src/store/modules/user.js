@@ -36,6 +36,7 @@ const actions = {
             localStorage.setItem('userInfo', JSON.stringify(data))
 
             const {
+              csrf_token: token,
               email,
               name,
               profile,
@@ -44,6 +45,7 @@ const actions = {
               user_id: userId
             } = data
 
+            commit('SET_TOKEN', token)
             commit('SET_EMAIL', email)
             commit('SET_NAME', name)
             commit('SET_PROFILE', profile)
@@ -85,6 +87,7 @@ const actions = {
             localStorage.setItem('userInfo', JSON.stringify(data))
 
             const {
+              csrf_token: token,
               email,
               name,
               profile,
@@ -93,6 +96,7 @@ const actions = {
               user_id: userId
             } = res.data
 
+            commit('SET_TOKEN', token)
             commit('SET_EMAIL', email)
             commit('SET_NAME', name)
             commit('SET_PROFILE', profile)

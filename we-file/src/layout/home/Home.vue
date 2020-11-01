@@ -66,6 +66,7 @@ export default {
   mounted () {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'))
     if (userInfo) {
+      store.commit('user/SET_TOKEN', userInfo.csrf_token)
       store.commit('user/SET_EMAIL', userInfo.email)
       store.commit('user/SET_NAME', userInfo.name)
       store.commit('user/SET_PROFILE', userInfo.profile)
