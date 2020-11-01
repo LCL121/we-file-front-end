@@ -18,7 +18,7 @@
       <transition name="nav-transition">
         <nav
           class="user-nav"
-          v-if="navShow"
+          v-show="navShow"
         >
           <router-link
             to="/user/user-home"
@@ -42,7 +42,7 @@
     </div>
     <div
       class="user-mask"
-      v-if="navShow"
+      v-show="navShow"
       @click="hiddenNav"
     ></div>
   </div>
@@ -57,18 +57,13 @@ export default {
   data () {
     return {
       index: 0,
-      navShow: !store.state.base.isMobileView
+      navShow: true
     }
-  },
-  computed: {
-    ...mapState({
-      isMobileView: state => state.base.isMobileView
-    })
   },
   methods: {
     changeSeleted (item) {
       this.index = item
-      !this.isMobileView || (this.navShow = false)
+      this.navShow = false
     },
     showNav () {
       this.navShow = true

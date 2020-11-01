@@ -22,7 +22,6 @@ if (document.documentElement.clientWidth > 500) {
   document.documentElement.style.fontSize = '100px'
 } else {
   document.documentElement.style.fontSize = document.documentElement.clientWidth / 5 + 'px'
-  store.commit('base/SET_IS_MODILE_VIEW', true)
 }
 
 // console.log = function (thing) {

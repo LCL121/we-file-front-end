@@ -55,7 +55,8 @@ export default {
           style: {
             top: `${this.randomDistance(document.documentElement.clientHeight / 2, -100)}px`,
             left: `${this.randomDistance(100, document.documentElement.clientWidth)}px`,
-            animationDelay: (i % 6 === 0) ? '0s' : `${i * 0.8}s`
+            animationDelay: (i % 6 === 0) ? '0s' : `${i * 0.8}s`,
+            animationDuration: `${Math.random() * 1000 + 1000}ms`
           }
         })
       }
