@@ -42,34 +42,74 @@
         v-for="item in fileList"
         :key="`${item.file_id}_${item.file_name}`"
       >
-        <span>
-          <svg
-            class="icon file-icon"
-            aria-hidden="true"
-            v-html="getFileIcon(item.is_directory, item.file_name)"
-          ></svg>
-          <router-link
-            :to="`/user/user-home?path=${directory}${addSep()}${item.file_name}`"
-            class="file-name"
-            v-if="item.is_directory"
-          >{{item.file_name}}</router-link>
-          <span
-            class="file-name"
-            v-else
-          >{{item.file_name}}</span>
-          <svg
-            class="icon file-download"
-            aria-hidden="true"
-            @click="downloadFile(item.file_id, item.file_name)"
-            v-if="!item.is_directory"
-          >
-            <use xlink:href="#icon-xiazai"></use>
-          </svg>
+        <span class="item-span">
+          <span class="item-left">
+            <svg
+              class="icon file-icon"
+              aria-hidden="true"
+              v-html="getFileIcon(item.is_directory, item.file_name)"
+            ></svg>
+            <router-link
+              :to="`/user/user-home?path=${directory}${addSep()}${item.file_name}`"
+              class="file-name"
+              v-if="item.is_directory"
+            >{{item.file_name}}</router-link>
+            <span
+              class="file-name"
+              v-else
+            >{{item.file_name}}</span>
+          </span>
+          <span class="item-right">
+            <svg
+              class="icon"
+              aria-hidden="true"
+              @click="downloadFile(item.file_id, item.file_name)"
+              v-if="!item.is_directory"
+            >
+              <use xlink:href="#icon-xiazai"></use>
+            </svg>
+            <svg
+              class="icon"
+              aria-hidden="true"
+              @click="() => {beforeDelete(item.file_name)}"
+            >
+              <use xlink:href="#icon-shanchu"></use>
+            </svg>
+          </span>
         </span>
-        <span>{{getFileSize(item.is_directory, item.file_size)}}</span>
-        <span>{{getFileTime(item.upload_at)}}</span>
+        <span class="item-span">{{getFileSize(item.is_directory, item.file_size)}}</span>
+        <span class="item-span">{{getFileTime(item.upload_at)}}</span>
       </div>
     </div>
+    <popup
+      v-if="isShowInputFileNameSlot"
+      :determineButton="() => { determineButton(createFolder) }"
+      :cancleButton="() => { cancleButton() }"
+    >
+      <div class="popup-slot fm-input">
+        <p class="popup-name">请输入文件夹名称</p>
+        <form @submit.prevent="">
+          <label for="input-file-name"></label>
+          <input
+            id="input-file-name"
+            type="text"
+            v-focus
+            v-model="inputFileName"
+            placeholder="不能为空"
+            pattern=".{1,64}"
+            autocomplete
+            required
+          >
+        </form>
+      </div>
+    </popup>
+    <popup
+      v-if="isShowDeleteSlot"
+      :determineButton="() => { determineButton(deleteFile) }"
+      :cancleButton="() => { cancleButton() }"
+    >
+      <p class="popup-name delete-popup">是否确定删除该文件/文件夹</p>
+    </popup>
   </div>
 </template>
 
@@ -77,9 +117,13 @@
 import store from '@/store'
 import axios from 'axios'
 import qs from 'qs'
+import Popup from '@/components/Popup'
 
 export default {
   name: 'UserHome',
+  components: {
+    Popup
+  },
   data () {
     return {
       buttonsIcon: [
@@ -97,7 +141,12 @@ export default {
       fileList: [],
       menuList: ['文件名', '大小', '修改日期'],
       directory: '/',
-      userId: store.state.user.userId
+      userId: store.state.user.userId,
+      token: store.state.user.token,
+      isShowInputFileNameSlot: false,
+      isShowDeleteSlot: false,
+      inputFileName: '',
+      deleteFileName: ''
     }
   },
   methods: {
@@ -270,7 +319,7 @@ export default {
       console.log(downloadAuthorization)
       // 使用axios
       await axios.request({
-        url: `${downloadAddress}/api/v1/download`,
+        url: `${downloadAddress}/api/v1/download?file_id=${BigInt(fileId)}`,
         method: 'GET',
         headers: {
           authorization: downloadAuthorization
@@ -284,16 +333,26 @@ export default {
         })
     },
     beforeCreateFolder () {
-      const name = prompt('请输入文件名字', '新建文件夹')
-      if (name) {
-        this.createFolder(name)
-      }
+      this.isShowInputFileNameSlot = true
     },
-    createFolder (name) {
+    determineButton (callBack) {
+      console.log('determine')
+      callBack()
+    },
+    cancleButton () {
+      console.log('cancle')
+      this.isShowInputFileNameSlot = false
+      this.isShowDeleteSlot = false
+      this.inputFileName = ''
+      this.deleteFileName = ''
+    },
+    async createFolder () {
+      console.log('create folder')
+      if (this.inputFileName === '') return
       axios.post(`/api/v1/file_list/${this.userId}`, qs.stringify({
-        csrf_token: store.state.user.token,
+        csrf_token: this.token,
         directory: this.directory,
-        name
+        name: this.inputFileName
       }))
         .then(res => {
           console.log(res)
@@ -304,6 +363,28 @@ export default {
           console.log(e.response)
           this.signOut()
         })
+      this.isShowInputFileNameSlot = false
+      this.inputFileName = ''
+    },
+    beforeDelete (name) {
+      this.isShowDeleteSlot = true
+      this.deleteFileName = name
+    },
+    async deleteFile () {
+      console.log('delete file')
+      console.log(this.deleteFileName, this.directory, this.token)
+      await axios.delete(`/api/v1/file_list/${this.userId}?name=${this.deleteFileName}&directory=${this.directory}&csrf_token=${this.token}`)
+        .then(res => {
+          console.log(res)
+          this.getFileList()
+        })
+        .catch((e) => {
+          console.log(e)
+          console.log(e.response)
+          this.signOut()
+        })
+      this.isShowDeleteSlot = false
+      this.deleteFileName = ''
     }
   },
   watch: {
@@ -330,6 +411,25 @@ export default {
 <style scoped lang="scss">
 @import "@/style/index.scss";
 @import "./style/pc.scss";
+
+.popup-slot {
+  .popup-name {
+    font-size: 15px;
+  }
+
+  input:invalid {
+    border: 1px solid #f00;
+  }
+
+  input:focus {
+    background: #fff;
+  }
+}
+
+.delete-popup {
+  margin: 0 auto;
+  font-size: 15px;
+}
 
 .user-home {
   height: 100%;

@@ -6,6 +6,7 @@ $bread-height: px2rem(16);
 $white: #fff;
 $blue: #09AAFF;
 $nav-color: #888;
+$list-first-width: px2rem(330);
 
 @media screen and (min-width:801px) {
   .user-home-nav {
@@ -27,7 +28,7 @@ $nav-color: #888;
         font-size: 13px;
         margin: 0 px2rem(5);
         vertical-align: baseline;
-        border-radius: px2rem(4);
+        border-radius: $default-border-radius;
         padding: 0 px2rem(10);
         cursor: pointer;
       }
@@ -47,7 +48,7 @@ $nav-color: #888;
     .bread-crumb {
       height: $bread-height;
       padding-right: px2rem(16);
-      
+
       a {
         color: $nav-color;
         padding-left: px2rem(16);
@@ -75,7 +76,7 @@ $nav-color: #888;
       }
 
       span:nth-child(1) {
-        min-width: px2rem(300);
+        min-width: $list-first-width;
       }
 
       span:nth-child(3) {
@@ -103,49 +104,66 @@ $nav-color: #888;
       border-bottom: 1px solid #f2f6fd;
       box-sizing: border-box;
 
-      span {
+      .item-span {
         flex: 1;
         padding-left: px2rem(16);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+      }
 
-        .file-icon {
-          font-size: 30px;
-          vertical-align: middle;
+      .item-span:nth-child(1) {
+        min-width: $list-first-width;
+
+        .item-left {
+          flex: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+
+          .file-icon {
+            font-size: 30px;
+            vertical-align: middle;
+          }
+
+          .file-name {
+            padding-left: px2rem(16);
+            vertical-align: middle;
+            color: $nav-color;
+          }
         }
 
-        .file-name {
-          padding-left: px2rem(16);
-          color: $nav-color;
-        }
-        
-        .file-download {
+        .item-right {
+          width: px2rem(56);
           font-size: 15px;
           vertical-align: middle;
-          height: px2rem(44);
-          line-height: px2rem(44);
-          float: right;
-          cursor: pointer;
           padding-right: px2rem(16);
+          margin-left: px2rem(16);
           opacity: 0;
+          box-sizing: border-box;
+
+          svg {
+            cursor: pointer;
+          }
+
+          svg:nth-child(2) {
+            margin-left: px2rem(10);
+          }
         }
       }
 
-      span:nth-child(1) {
-        min-width: px2rem(300);
-      }
-
-      span:nth-child(3) {
+      .item-span:nth-child(3) {
         min-width: px2rem(150);
       }
 
-      span:hover {
+      .item-span:hover {
         background: #F4FBFF;
         border-color: #CBEDFF;
 
-        .file-download {
+        .item-right {
           opacity: 1;
         }
       }

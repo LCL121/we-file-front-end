@@ -50,7 +50,7 @@ $selected-color: #000;
           width: 80%;
           @include textCenter(px2rem(40));
           margin: px2rem(15) auto;
-          border-radius: px2rem(4);
+          border-radius: $default-border-radius;
           color: $default-color;
         }
 

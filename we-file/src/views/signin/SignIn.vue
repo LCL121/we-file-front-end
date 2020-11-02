@@ -78,7 +78,12 @@ export default {
             this.$router.push({ path: '/user' })
           }
         } else {
-          this.message = data.message
+          const message = JSON.parse(data.message)
+          if (message.detail) {
+            this.message = data.message.detail
+          } else {
+            this.message = data.message
+          }
         }
       } catch (err) {
         console.log(err)

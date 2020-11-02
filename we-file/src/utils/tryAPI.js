@@ -19,6 +19,17 @@ export const tryAPI = async () => {
   //     console.log(res)
   //   })
 
+  // 测试注册接口
+  // await axios.post('/api/v1/user/sign_up', qs.stringify({
+  //   email: '1391436522@qq.com',
+  //   name: 'string',
+  //   password: '123abcABC',
+  //   verify_code: 'string'
+  // }))
+  //   .then(res => {
+  //     console.log(res.data)
+  //   })
+
   // 测试登录接口
   let userId = 0
   await axios.post('/api/v1/user/sign_in', qs.stringify({
@@ -30,17 +41,6 @@ export const tryAPI = async () => {
       userId = BigInt(res.data.user_id)
     })
 
-  // // 测试注册接口
-  // await axios.post('/api/v1/user/sign_up', qs.stringify({
-  //   email: 'string',
-  //   name: 'string',
-  //   password: 'stringst',
-  //   verify_code: 'string'
-  // }))
-  //   .then(res => {
-  //     console.log(res.data)
-  //   })
-
   // 测试获取目录接口
   let directory = null
   await axios.get(`/api/v1/file_list/${userId}?directory=/`)
@@ -50,7 +50,7 @@ export const tryAPI = async () => {
     })
   console.log(directory)
 
-  const file1 = directory.files[2]
+  const file1 = directory.files[1]
   console.log('fileId: ', BigInt(file1.file_id))
 
   // 测试获取下载地址接口
@@ -66,36 +66,36 @@ export const tryAPI = async () => {
   console.log(downloadAuthorization)
 
   // // 测试下载功能
-  // // 使用fetch
-  // await fetch(`${downloadAddress}/api/v1/download`, {
-  //   method: 'GET',
-  //   headers: {
-  //     authorization: downloadAuthorization
-  //   }
-  // })
-  //   .then(res => res.blob())
-  //   .then(data => {
-  //     const blobURL = window.URL.createObjectURL(data)
-  //     downloadFile(file1.file_name, blobURL)
-  //   })
-
-  // 使用axios
-  await axios.request({
-    url: `${downloadAddress}/api/v1/download`,
+  // 使用fetch
+  await fetch(`${downloadAddress}/api/v1/download`, {
     method: 'GET',
     headers: {
       authorization: downloadAuthorization
-    },
-    responseType: 'blob'
+    }
   })
-    .then(res => {
-      // console.log(res)
-      // console.log(res.headers)
-      // console.log(res.data)
-      const blob = new Blob([res.data])
-      const blobURL = window.URL.createObjectURL(blob)
+    .then(res => res.blob())
+    .then(data => {
+      const blobURL = window.URL.createObjectURL(data)
       downloadFile(file1.file_name, blobURL)
     })
+
+  // 使用axios
+  // await axios.request({
+  //   url: `${downloadAddress}/api/v1/download`,
+  //   method: 'GET',
+  //   headers: {
+  //     authorization: downloadAuthorization
+  //   },
+  //   responseType: 'blob'
+  // })
+  //   .then(res => {
+  //     // console.log(res)
+  //     // console.log(res.headers)
+  //     // console.log(res.data)
+  //     const blob = new Blob([res.data])
+  //     const blobURL = window.URL.createObjectURL(blob)
+  //     downloadFile(file1.file_name, blobURL)
+  //   })
 
   // // 测试上传功能
   // const inputDom = document.createElement('input')

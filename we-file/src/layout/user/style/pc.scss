@@ -13,7 +13,7 @@ $selected-bgcolor: #fff;
 
     .user-title {
       @include textCenter($title-height);
-      box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .05);
+      box-shadow: 0 px2rem(2) px2rem(6) 0 rgba(0, 0, 0, .05);
       cursor: default;
 
       .nav-button {
@@ -42,7 +42,7 @@ $selected-bgcolor: #fff;
           width: 80%;
           @include textCenter(px2rem(40));
           margin: px2rem(15) auto;
-          border-radius: px2rem(4);
+          border-radius: $default-border-radius;
         }
 
         a:hover {
