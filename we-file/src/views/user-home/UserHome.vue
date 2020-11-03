@@ -81,6 +81,7 @@
         <span class="item-span">{{getFileTime(item.upload_at)}}</span>
       </div>
     </div>
+    <!-- 新建文件夹popup -->
     <popup
       v-if="isShowInputFileNameSlot"
       :determineButton="() => { determineButton(createFolder) }"
@@ -103,6 +104,7 @@
         </form>
       </div>
     </popup>
+    <!-- 删除文件/文件夹popup -->
     <popup
       v-if="isShowDeleteSlot"
       :determineButton="() => { determineButton(deleteFile) }"
@@ -110,6 +112,12 @@
     >
       <p class="popup-name delete-popup">是否确定删除该文件/文件夹</p>
     </popup>
+    <transition name="progress-transition">
+      <upload-progress
+        v-show="isShowUploadProgress"
+        :hiddenUploadProgress="() => {changeUploadProgress(false)}"
+      ></upload-progress>
+    </transition>
   </div>
 </template>
 
@@ -118,11 +126,13 @@ import store from '@/store'
 import axios from 'axios'
 import qs from 'qs'
 import Popup from '@/components/Popup'
+import UploadProgress from './components/UploadProgress'
 
 export default {
   name: 'UserHome',
   components: {
-    Popup
+    Popup,
+    UploadProgress
   },
   data () {
     return {
@@ -136,6 +146,13 @@ export default {
           svg: '<use xlink:href="#icon-xinjianwenjianjia"></use>',
           text: '新建文件夹',
           click: this.beforeCreateFolder
+        },
+        {
+          svg: '<use xlink:href="#icon-liebiao"></use>',
+          text: '上传列表',
+          click: () => {
+            this.changeUploadProgress(true)
+          }
         }
       ],
       fileList: [],
@@ -143,10 +160,13 @@ export default {
       directory: '/',
       userId: store.state.user.userId,
       token: store.state.user.token,
+      // popup
       isShowInputFileNameSlot: false,
       isShowDeleteSlot: false,
       inputFileName: '',
-      deleteFileName: ''
+      deleteFileName: '',
+      // upload progress
+      isShowUploadProgress: false
     }
   },
   methods: {
@@ -279,6 +299,7 @@ export default {
 
         const url = `${uploadAddress}/api/v1/upload`
         console.log(url, uploadAuthorization)
+        this.isShowUploadProgress = true
         axios.request({
           url,
           method: 'POST',
@@ -286,10 +307,24 @@ export default {
             authorization: uploadAuthorization,
             'Content-Type': 'multipart/form-data'
           },
-          data: param
+          data: param,
+          onUploadProgress: (event) => {
+            store.commit('base/SET_UPLOADING_LIST', {
+              key: file.name,
+              value: {
+                fileName: file.name,
+                fileSize: file.size,
+                path: this.directory,
+                currentValue: event.loaded,
+                maxValue: event.total
+              }
+            })
+          }
         })
           .then(res => {
             console.log(res)
+            this.isShowUploadProgress = false
+            store.commit('base/DELETE_UPLOADING_LIST', file.name)
             this.getFileList()
           })
           .catch((e) => {
@@ -323,6 +358,10 @@ export default {
         method: 'GET',
         headers: {
           authorization: downloadAuthorization
+        },
+        onDownloadProgress: (event) => {
+          console.log('loaded', event.loaded)
+          console.log('total', event.total)
         },
         responseType: 'blob'
       })
@@ -385,6 +424,9 @@ export default {
         })
       this.isShowDeleteSlot = false
       this.deleteFileName = ''
+    },
+    changeUploadProgress (status) {
+      this.isShowUploadProgress = status
     }
   },
   watch: {
@@ -411,6 +453,7 @@ export default {
 <style scoped lang="scss">
 @import "@/style/index.scss";
 @import "./style/pc.scss";
+@import "./style/transition.scss";
 
 .popup-slot {
   .popup-name {

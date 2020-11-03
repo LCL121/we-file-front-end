@@ -1,6 +1,6 @@
 <template>
   <div class="user">
-    <div class="user-title">
+    <header class="user-title">
       <div
         class="nav-button"
         @click="showNav"
@@ -13,7 +13,7 @@
         </svg>
       </div>
       WeFile
-    </div>
+    </header>
     <div class="user-main">
       <transition name="nav-transition">
         <nav

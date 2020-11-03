@@ -7,12 +7,18 @@
 }
 
 html,
-body {
+body,
+ul,
+li {
   margin: 0;
   padding: 0;
   border: 0;
   vertical-align: baseline;
   overflow: hidden;
+}
+
+ul li {
+  list-style: none;
 }
 
 body {

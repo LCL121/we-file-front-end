@@ -37,7 +37,7 @@ $selected-color: #000;
         width: $nav-width;
         height: 100vh;
         background: $nav-bgcolor;
-        z-index: 100;
+        z-index: 1001;
         padding-top: px2rem(200);
         box-sizing: border-box;
 
@@ -70,6 +70,7 @@ $selected-color: #000;
       background: $mask-bgcolr;
       width: 100vw;
       height: 100vh;
+      z-index: 1000;
     }
   }
 }
