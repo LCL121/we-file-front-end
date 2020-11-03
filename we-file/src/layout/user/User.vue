@@ -57,18 +57,12 @@ export default {
   data () {
     return {
       index: 0,
-      navShow: true,
-      userHomePath: '/'
+      navShow: true
     }
   },
-  watch: {
-    $route (to, from) {
-      if (to.path === '/user/user-home') {
-        const path = this.$route.query.path
-        if (path) {
-          this.userHomePath = path
-        }
-      }
+  computed: {
+    userHomePath () {
+      return store.state.base.currentDirectory
     }
   },
   methods: {
@@ -92,14 +86,6 @@ export default {
       next('/signin')
     }
     next()
-  },
-  mounted () {
-    if (this.$route.path === '/user/user-home') {
-      const path = this.$route.query.path
-      if (path) {
-        this.userHomePath = path
-      }
-    }
   }
 }
 </script>

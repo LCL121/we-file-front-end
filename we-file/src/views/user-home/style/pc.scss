@@ -8,7 +8,7 @@ $blue: #09AAFF;
 $nav-color: #888;
 $list-first-width: px2rem(330);
 
-// @media screen and (min-width:801px) {
+@media screen and (min-width:801px) {
   .user-home-nav {
     height: $nav-height;
     display: flex;
@@ -169,4 +169,4 @@ $list-first-width: px2rem(330);
       }
     }
   }
-// }
+}

@@ -155,18 +155,26 @@ export default {
           }
         }
       ],
-      fileList: [],
       menuList: ['文件名', '大小', '修改日期'],
-      directory: '/',
       userId: store.state.user.userId,
       token: store.state.user.token,
       // popup
       isShowInputFileNameSlot: false,
       isShowDeleteSlot: false,
       inputFileName: '',
-      deleteFileName: '',
-      // upload progress
-      isShowUploadProgress: false
+      deleteFileName: ''
+    }
+  },
+  computed: {
+    directory () {
+      return store.state.base.currentDirectory
+    },
+    fileList () {
+      return store.state.base.fileList
+    },
+    // upload progress
+    isShowUploadProgress () {
+      return store.state.base.isShowUploadProgress
     }
   },
   methods: {
@@ -258,28 +266,6 @@ export default {
       }
       return `${Math.round(fileSize * 10) / 10}${suffix[num]}`
     },
-    getFileList () {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'))
-      axios.get(`/api/v1/file_list/${this.userId}?directory=${this.directory}`)
-        .then(res => {
-          const data = res.data
-          console.log(data)
-          if (data.message) {
-            if (data.message === 'valid session') {
-              this.signOut()
-              return
-            }
-          }
-          this.fileList = data.files.sort((a, b) => {
-            if (a.is_directory && !b.is_directory) return -1
-            else return 1
-          })
-        })
-        .catch(e => {
-          console.log(e)
-          this.signOut()
-        })
-    },
     initFileInput () {
       this.$refs.input.onchange = async (e) => {
         const file = e.target.files[0]
@@ -299,7 +285,7 @@ export default {
 
         const url = `${uploadAddress}/api/v1/upload`
         console.log(url, uploadAuthorization)
-        this.isShowUploadProgress = true
+        store.commit('base/SET_SHOW_UPLOAD_PROGRESS', true)
         axios.request({
           url,
           method: 'POST',
@@ -323,9 +309,9 @@ export default {
         })
           .then(res => {
             console.log(res)
-            this.isShowUploadProgress = false
             store.commit('base/DELETE_UPLOADING_LIST', file.name)
-            this.getFileList()
+            store.commit('base/SET_SHOW_UPLOAD_PROGRESS', false)
+            store.dispatch('base/getFileList')
           })
           .catch((e) => {
             console.log(e)
@@ -395,7 +381,7 @@ export default {
       }))
         .then(res => {
           console.log(res)
-          this.getFileList()
+          store.dispatch('base/getFileList')
         })
         .catch((e) => {
           console.log(e)
@@ -415,7 +401,7 @@ export default {
       await axios.delete(`/api/v1/file_list/${this.userId}?name=${this.deleteFileName}&directory=${this.directory}&csrf_token=${this.token}`)
         .then(res => {
           console.log(res)
-          this.getFileList()
+          store.dispatch('base/getFileList')
         })
         .catch((e) => {
           console.log(e)
@@ -426,25 +412,29 @@ export default {
       this.deleteFileName = ''
     },
     changeUploadProgress (status) {
-      this.isShowUploadProgress = status
+      store.commit('base/SET_SHOW_UPLOAD_PROGRESS', status)
     }
   },
   watch: {
     $route (to, from) {
       const path = to.query.path
       if (path) {
-        this.directory = path
+        store.commit('base/SET_CURRENT_DIRECTORY', path)
+      } else {
+        store.commit('base/SET_CURRENT_DIRECTORY', '/')
       }
-      this.getFileList()
+      store.dispatch('base/getFileList')
       this.initFileInput()
     }
   },
   mounted () {
     const path = this.$route.query.path
     if (path) {
-      this.directory = path
+      store.commit('base/SET_CURRENT_DIRECTORY', path)
+    } else {
+      store.commit('base/SET_CURRENT_DIRECTORY', '/')
     }
-    this.getFileList()
+    store.dispatch('base/getFileList')
     this.initFileInput()
   }
 }
