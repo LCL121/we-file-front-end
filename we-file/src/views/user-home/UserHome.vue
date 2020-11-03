@@ -128,6 +128,8 @@ import qs from 'qs'
 import Popup from '@/components/Popup'
 import UploadProgress from './components/UploadProgress'
 
+const CancelToken = axios.CancelToken
+
 export default {
   name: 'UserHome',
   components: {
@@ -206,6 +208,7 @@ export default {
       return this.directory === '/' ? '' : '/'
     },
     signOut () {
+      console.log('sign out')
       store.dispatch('user/signOut')
       this.$router.push('/')
     },
@@ -285,7 +288,8 @@ export default {
 
         const url = `${uploadAddress}/api/v1/upload`
         console.log(url, uploadAuthorization)
-        store.commit('base/SET_SHOW_UPLOAD_PROGRESS', true)
+        store.commit('base/CHANGE_UPLOAD_PROGRESS_STATUS', true)
+        const currentPath = this.directory
         axios.request({
           url,
           method: 'POST',
@@ -296,7 +300,7 @@ export default {
           data: param,
           onUploadProgress: (event) => {
             store.commit('base/SET_UPLOADING_LIST', {
-              key: file.name,
+              key: `${file.name}-${currentPath}`,
               value: {
                 fileName: file.name,
                 fileSize: file.size,
@@ -305,18 +309,25 @@ export default {
                 maxValue: event.total
               }
             })
-          }
+          },
+          cancelToken: new CancelToken((c) => {
+            store.commit('base/ADD_UPLOAD_CANCLE', c)
+          })
         })
           .then(res => {
             console.log(res)
-            store.commit('base/DELETE_UPLOADING_LIST', file.name)
-            store.commit('base/SET_SHOW_UPLOAD_PROGRESS', false)
+            store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
+            if (Object.keys(store.state.base.uploadingList).length === 0) {
+              store.commit('base/CHANGE_UPLOAD_PROGRESS_STATUS', false)
+            }
             store.dispatch('base/getFileList')
           })
           .catch((e) => {
-            console.log(e)
-            console.log(e.response)
-            this.signOut()
+            if (e.toString() !== 'Cancel') {
+              console.log(e)
+              console.log(e.response)
+              this.signOut()
+            }
           })
       }
     },
@@ -412,7 +423,7 @@ export default {
       this.deleteFileName = ''
     },
     changeUploadProgress (status) {
-      store.commit('base/SET_SHOW_UPLOAD_PROGRESS', status)
+      store.commit('base/CHANGE_UPLOAD_PROGRESS_STATUS', status)
     }
   },
   watch: {

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import qs from 'qs'
+import store from '@/store'
 
 const state = {
   token: '',
@@ -117,7 +118,15 @@ const actions = {
   },
 
   // 退出
-  signOut ({ commit, state }) {
+  async signOut ({ commit, state }) {
+    const uploadCancleList = store.state.base.uploadCancleList
+    if (uploadCancleList.length !== 0) {
+      for (const uploadCancle of uploadCancleList) {
+        uploadCancle()
+      }
+      store.commit('base/DELETE_ALL_UPLOADING_LIST')
+      store.commit('base/CHANGE_UPLOAD_PROGRESS_STATUS', false)
+    }
     localStorage.removeItem('userInfo')
     commit('SET_EMAIL', '')
     commit('SET_NAME', '')

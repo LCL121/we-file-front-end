@@ -19,8 +19,8 @@
     <ul class="uploading-list">
       <li
         class="uploading-item"
-        v-for="item in uploadList"
-        :key="item.fileName"
+        v-for="(item, key) in uploadList"
+        :key="key"
       >
         <span>{{item.fileName}}</span>
         <span>{{getFileSize(item.fileSize)}}</span>

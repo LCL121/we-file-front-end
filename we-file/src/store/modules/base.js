@@ -6,7 +6,8 @@ const state = {
   currentDirectory: '',
   uploadingList: {},
   fileList: [],
-  isShowUploadProgress: false
+  isShowUploadProgress: false,
+  uploadCancleList: []
 }
 
 const getters = {
@@ -46,7 +47,12 @@ const mutations = {
    */
   SET_UPLOADING_LIST (state, uploadingItem) {
     const newData = JSON.parse(JSON.stringify(state.uploadingList))
-    newData[uploadingItem.key] = uploadingItem.value
+    const key = uploadingItem.key
+    if (key in newData) {
+      newData[key].currentValue = uploadingItem.value.currentValue
+    } else {
+      newData[key] = uploadingItem.value
+    }
     state.uploadingList = newData
   },
   /**
@@ -56,14 +62,22 @@ const mutations = {
   DELETE_UPLOADING_LIST (state, key) {
     delete state.uploadingList[key]
   },
+  DELETE_ALL_UPLOADING_LIST (state) {
+    for (const key of Object.keys(state.uploadingList)) {
+      delete state.uploadingList[key]
+    }
+  },
   SET_CURRENT_DIRECTORY (state, directory) {
     state.currentDirectory = directory
   },
   SET_FILE_LIST (state, fileList) {
     state.fileList = fileList
   },
-  SET_SHOW_UPLOAD_PROGRESS (state, isShowUploadProgress) {
+  CHANGE_UPLOAD_PROGRESS_STATUS (state, isShowUploadProgress) {
     state.isShowUploadProgress = isShowUploadProgress
+  },
+  ADD_UPLOAD_CANCLE (state, uploadCancle) {
+    state.uploadCancleList.push(uploadCancle)
   }
 }
 
