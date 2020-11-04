@@ -24,7 +24,7 @@
       >
         <span>{{item.fileName}}</span>
         <span>{{getFileSize(item.fileSize)}}</span>
-        <span>{{item.path}}</span>
+        <span @click="changeDirectory(item.path)">{{getPathName(item.path)}}</span>
         <span>{{getFileStatus(item.currentValue, item.maxValue)}}</span>
         <div
           class="progress"
@@ -63,6 +63,21 @@ export default {
       } else {
         return `${Math.round(current / max * 10000) / 100}%`
       }
+    },
+    getPathName (path) {
+      if (path === '/') {
+        return '全部文件'
+      } else {
+        const arr = /.*\/(.*)/.exec(path)
+        return arr[1]
+      }
+    },
+    changeDirectory (directory) {
+      const currentDirectory = this.$route.query.path || '/'
+      if (currentDirectory !== directory) {
+        this.$router.push(`/user/user-home?path=${directory}`)
+      }
+      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
     }
   }
 }
@@ -142,6 +157,11 @@ export default {
 
       span:nth-child(1) {
         min-width: px2rem(200);
+      }
+
+      span:nth-child(3) {
+        cursor: pointer;
+        color: #5d9cff;
       }
 
       .progress {

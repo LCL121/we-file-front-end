@@ -387,7 +387,7 @@ export default {
       })
       const currentPath = this.directory
       store.commit('base/SET_DOWNLOADING_LIST', {
-        key: `${fileId}-${currentPath}`,
+        key: `${BigInt(fileId)}-${currentPath}`,
         value: {
           fileName,
           fileSize: fileSize,
@@ -405,7 +405,7 @@ export default {
         },
         onDownloadProgress: (event) => {
           store.commit('base/SET_DOWNLOADING_LIST', {
-            key: `${fileId}-${currentPath}`,
+            key: `${BigInt(fileId)}-${currentPath}`,
             value: {
               fileName,
               fileSize: fileSize,
@@ -422,8 +422,8 @@ export default {
       })
         .then(res => {
           console.log(res)
-          store.commit('base/DELETE_DOWNLOADING_LIST', `${fileName}-${currentPath}`)
-          if (Object.keys(store.state.base.uploadingList).length === 0) {
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${BigInt(fileId)}-${currentPath}`)
+          if (Object.keys(store.state.base.downloadingList).length === 0) {
             store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
           }
           const blob = new Blob([res.data])

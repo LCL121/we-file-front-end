@@ -11,9 +11,6 @@ const state = {
   downloadCancleList: []
 }
 
-const getters = {
-}
-
 const actions = {
   getFileList ({ commit, state }, data) {
     axios.get(`/api/v1/file_list/${store.state.user.userId}?directory=${state.currentDirectory}`)
@@ -112,7 +109,6 @@ const mutations = {
 export default {
   namespaced: true,
   state,
-  getters,
   actions,
   mutations
 }

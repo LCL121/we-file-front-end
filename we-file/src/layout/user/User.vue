@@ -32,7 +32,7 @@
           >个人中心</router-link>
           <router-link
             to=""
-            @click.native="signOut"
+            @click.native="judgeisSignOut"
           >退出登录</router-link>
         </nav>
       </transition>
@@ -45,19 +45,31 @@
       v-show="navShow"
       @click="hiddenNav"
     ></div>
+    <popup
+      v-if="isShowSignOutSlot"
+      :determineButton="() => { signOut() }"
+      :cancleButton="() => { this.isShowSignOutSlot = false }"
+    >
+      <p class="popup-name">有文件正在上传/下载中，如果退出任务将会停止</p>
+    </popup>
   </div>
 </template>
 
 <script>
 import store from '@/store'
 import { mapState } from 'vuex'
+import popup from '@/components/Popup'
 
 export default {
   name: 'User',
+  components: {
+    popup
+  },
   data () {
     return {
       index: 0,
-      navShow: true
+      navShow: true,
+      isShowSignOutSlot: false
     }
   },
   computed: {
@@ -77,7 +89,16 @@ export default {
     hiddenNav () {
       this.navShow = false
     },
+    judgeisSignOut () {
+      if (Object.keys(store.state.base.uploadingList).length === 0 &&
+        Object.keys(store.state.base.downloadingList).length === 0) {
+        store.dispatch('user/signOut')
+      } else {
+        this.isShowSignOutSlot = true
+      }
+    },
     signOut () {
+      this.isShowSignOutSlot = false
       store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
       store.dispatch('user/signOut')
     }
@@ -95,6 +116,11 @@ export default {
 @import "./style/transition.scss";
 @import "./style/pc.scss";
 @import "./style/mobile.scss";
+
+.popup-name {
+  font-size: 15px;
+  text-align: center;
+}
 
 .user {
   min-height: 100vh;

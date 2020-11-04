@@ -13,9 +13,6 @@ const state = {
   userId: ''
 }
 
-const getters = {
-}
-
 const actions = {
   // 登录
   signIn ({ commit, state }, data) {
@@ -176,7 +173,6 @@ const mutations = {
 export default {
   namespaced: true,
   state,
-  getters,
   actions,
   mutations
 }
