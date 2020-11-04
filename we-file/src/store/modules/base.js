@@ -1,13 +1,14 @@
 import store from '@/store'
-import router from '@/router'
 import axios from 'axios'
 
 const state = {
   currentDirectory: '',
-  uploadingList: {},
   fileList: [],
-  isShowUploadProgress: false,
-  uploadCancleList: []
+  isShowMyProgress: false,
+  uploadingList: {},
+  uploadCancleList: [],
+  downloadingList: {},
+  downloadCancleList: []
 }
 
 const getters = {
@@ -22,7 +23,6 @@ const actions = {
         if (data.message) {
           if (data.message === 'valid session') {
             store.dispatch('user/signOut')
-            router.push('/')
             return
           }
         }
@@ -35,7 +35,6 @@ const actions = {
       .catch(e => {
         console.log(e)
         store.dispatch('user/signOut')
-        router.push('/')
       })
   }
 }
@@ -47,12 +46,7 @@ const mutations = {
    */
   SET_UPLOADING_LIST (state, uploadingItem) {
     const newData = JSON.parse(JSON.stringify(state.uploadingList))
-    const key = uploadingItem.key
-    if (key in newData) {
-      newData[key].currentValue = uploadingItem.value.currentValue
-    } else {
-      newData[key] = uploadingItem.value
-    }
+    newData[uploadingItem.key] = uploadingItem.value
     state.uploadingList = newData
   },
   /**
@@ -67,17 +61,51 @@ const mutations = {
       delete state.uploadingList[key]
     }
   },
+  /**
+   * 更新 downloadingList
+   * @param {object} downloadingItem {key, value}
+   */
+  SET_DOWNLOADING_LIST (state, downloadingItem) {
+    const newData = JSON.parse(JSON.stringify(state.downloadingList))
+    newData[downloadingItem.key] = downloadingItem.value
+    state.downloadingList = newData
+  },
+  /**
+   * 删除 downloadingList 中已完成的项目
+   * @param {*} key
+   */
+  DELETE_DOWNLOADING_LIST (state, key) {
+    delete state.downloadingList[key]
+  },
+  DELETE_ALL_DOWNLOADING_LIST (state) {
+    for (const key of Object.keys(state.downloadingList)) {
+      delete state.downloadingList[key]
+    }
+  },
   SET_CURRENT_DIRECTORY (state, directory) {
     state.currentDirectory = directory
   },
   SET_FILE_LIST (state, fileList) {
     state.fileList = fileList
   },
-  CHANGE_UPLOAD_PROGRESS_STATUS (state, isShowUploadProgress) {
-    state.isShowUploadProgress = isShowUploadProgress
+  CHANGE_MY_PROGRESS_STATUS (state, isShowMyProgress) {
+    state.isShowMyProgress = isShowMyProgress
   },
   ADD_UPLOAD_CANCLE (state, uploadCancle) {
     state.uploadCancleList.push(uploadCancle)
+  },
+  DELETE_ALL_UPLOAD_CANCLE () {
+    while (state.uploadCancleList.length > 0) {
+      state.uploadCancleList.pop()
+    }
+  },
+  ADD_DOWNLOAD_CANCLE (state, downloadCancle) {
+    state.downloadCancleList.push(downloadCancle)
+  },
+  DELETE_ALL_DOWNLOAD_CANCLE () {
+    while (state.downloadCancleList.length > 0) {
+      state.downloadCancleList.pop()
+    }
   }
 }
 

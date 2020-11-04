@@ -1,11 +1,11 @@
 <template>
-  <div class="upload-progress">
-    <header class="upload-progress-header">
-      <div class="header-left">上传列表</div>
+  <div class="my-progress">
+    <header class="my-progress-header">
+      <div class="header-left">{{progressTitle}}</div>
       <svg
         class="icon header-right"
         aria-hidden="true"
-        @click="hiddenUploadProgress"
+        @click="hiddenMyProgress"
       >
         <use xlink:href="#icon-guanbi"></use>
       </svg>
@@ -16,16 +16,16 @@
         :key="item"
       >{{item}}</li>
     </ul>
-    <ul class="uploading-list">
+    <ul class="show-list">
       <li
-        class="uploading-item"
-        v-for="(item, key) in uploadList"
+        class="show-item"
+        v-for="(item, key) in showList"
         :key="key"
       >
         <span>{{item.fileName}}</span>
         <span>{{getFileSize(item.fileSize)}}</span>
         <span>{{item.path}}</span>
-        <span>{{`${Math.round(item.currentValue / item.maxValue * 10000) / 100}%`}}</span>
+        <span>{{getFileStatus(item.currentValue, item.maxValue)}}</span>
         <div
           class="progress"
           :style="{width: `${item.currentValue / item.maxValue * 100}%`}"
@@ -40,16 +40,11 @@
 import store from '@/store'
 
 export default {
-  name: 'UploadProgress',
-  props: ['hiddenUploadProgress'],
+  name: 'MyProgress',
+  props: ['hiddenMyProgress', 'progressTitle', 'showList'],
   data () {
     return {
-      menuList: ['文件名', '大小', '上传目录', '状态']
-    }
-  },
-  computed: {
-    uploadList () {
-      return store.state.base.uploadingList
+      menuList: ['文件名', '大小', '目录', '状态']
     }
   },
   methods: {
@@ -61,6 +56,13 @@ export default {
         num++
       }
       return `${Math.round(fileSize * 10) / 10}${suffix[num]}`
+    },
+    getFileStatus (current, max) {
+      if (current === 0) {
+        return '等待中'
+      } else {
+        return `${Math.round(current / max * 10000) / 100}%`
+      }
     }
   }
 }
@@ -75,7 +77,7 @@ export default {
   border-bottom: 1px solid #f2f6fd;
 }
 
-.upload-progress {
+.my-progress {
   position: fixed;
   bottom: 0;
   right: 0;
@@ -92,7 +94,7 @@ export default {
   color: #666;
   cursor: default;
 
-  .upload-progress-header {
+  .my-progress-header {
     font-size: 14px;
     display: flex;
     @include heightAndBottom(44);
@@ -126,8 +128,8 @@ export default {
     }
   }
 
-  .uploading-list {
-    .uploading-item {
+  .show-list {
+    .show-item {
       position: relative;
       display: flex;
       @include heightAndBottom(50);

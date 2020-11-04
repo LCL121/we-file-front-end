@@ -1,6 +1,7 @@
 import axios from 'axios'
 import qs from 'qs'
 import store from '@/store'
+import router from '@/router'
 
 const state = {
   token: '',
@@ -120,12 +121,22 @@ const actions = {
   // 退出
   async signOut ({ commit, state }) {
     const uploadCancleList = store.state.base.uploadCancleList
+    const downloadCancleList = store.state.base.downloadCancleList
     if (uploadCancleList.length !== 0) {
       for (const uploadCancle of uploadCancleList) {
         uploadCancle()
       }
       store.commit('base/DELETE_ALL_UPLOADING_LIST')
-      store.commit('base/CHANGE_UPLOAD_PROGRESS_STATUS', false)
+      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
+      store.commit('base/DELETE_ALL_UPLOAD_CANCLE')
+    }
+    if (downloadCancleList.length !== 0) {
+      for (const downloadCancle of downloadCancleList) {
+        downloadCancle()
+      }
+      store.commit('base/DELETE_ALL_DOWNLOADING_LIST')
+      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
+      store.commit('base/DELETE_ALL_DOWNLOAD_CANCLE')
     }
     localStorage.removeItem('userInfo')
     commit('SET_EMAIL', '')
@@ -134,6 +145,7 @@ const actions = {
     commit('SET_ROLE_ID', '')
     commit('SET_ROLE_NAME', '')
     commit('SET_USER_ID', '')
+    router.push('/')
   }
 }
 

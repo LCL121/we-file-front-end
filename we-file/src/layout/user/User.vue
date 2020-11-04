@@ -68,6 +68,7 @@ export default {
   methods: {
     changeSeleted (item) {
       this.index = item
+      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
       if (document.documentElement.clientWidth < 800) this.navShow = false
     },
     showNav () {
@@ -77,8 +78,8 @@ export default {
       this.navShow = false
     },
     signOut () {
+      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
       store.dispatch('user/signOut')
-      this.$router.push('/')
     }
   },
   beforeRouteEnter (to, from, next) {

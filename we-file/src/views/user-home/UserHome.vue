@@ -63,7 +63,7 @@
             <svg
               class="icon"
               aria-hidden="true"
-              @click="downloadFile(item.file_id, item.file_name)"
+              @click="downloadFile(item.file_id, item.file_name, item.file_size)"
               v-if="!item.is_directory"
             >
               <use xlink:href="#icon-xiazai"></use>
@@ -113,10 +113,12 @@
       <p class="popup-name delete-popup">是否确定删除该文件/文件夹</p>
     </popup>
     <transition name="progress-transition">
-      <upload-progress
-        v-show="isShowUploadProgress"
-        :hiddenUploadProgress="() => {changeUploadProgress(false)}"
-      ></upload-progress>
+      <my-progress
+        v-show="isShowMyProgress"
+        :hiddenMyProgress="() => {changeMyProgressStatus(false)}"
+        :progressTitle="progressTitle"
+        :showList="showWhat ? uploadingList : downloadingList"
+      ></my-progress>
     </transition>
   </div>
 </template>
@@ -126,7 +128,7 @@ import store from '@/store'
 import axios from 'axios'
 import qs from 'qs'
 import Popup from '@/components/Popup'
-import UploadProgress from './components/UploadProgress'
+import MyProgress from './components/MyProgress'
 
 const CancelToken = axios.CancelToken
 
@@ -134,7 +136,7 @@ export default {
   name: 'UserHome',
   components: {
     Popup,
-    UploadProgress
+    MyProgress
   },
   data () {
     return {
@@ -153,7 +155,20 @@ export default {
           svg: '<use xlink:href="#icon-liebiao"></use>',
           text: '上传列表',
           click: () => {
-            this.changeUploadProgress(true)
+            this.changeMyProgressStatus(true, () => {
+              this.progressTitle = '上传列表'
+              this.showWhat = true
+            })
+          }
+        },
+        {
+          svg: '<use xlink:href="#icon-liebiao"></use>',
+          text: '下载列表',
+          click: () => {
+            this.changeMyProgressStatus(true, () => {
+              this.progressTitle = '下载列表'
+              this.showWhat = false
+            })
           }
         }
       ],
@@ -164,7 +179,10 @@ export default {
       isShowInputFileNameSlot: false,
       isShowDeleteSlot: false,
       inputFileName: '',
-      deleteFileName: ''
+      deleteFileName: '',
+      // my progress
+      progressTitle: '上传列表',
+      showWhat: true
     }
   },
   computed: {
@@ -174,9 +192,15 @@ export default {
     fileList () {
       return store.state.base.fileList
     },
-    // upload progress
-    isShowUploadProgress () {
-      return store.state.base.isShowUploadProgress
+    // my progress
+    isShowMyProgress () {
+      return store.state.base.isShowMyProgress
+    },
+    uploadingList () {
+      return store.state.base.uploadingList
+    },
+    downloadingList () {
+      return store.state.base.downloadingList
     }
   },
   methods: {
@@ -206,11 +230,6 @@ export default {
     },
     addSep () {
       return this.directory === '/' ? '' : '/'
-    },
-    signOut () {
-      console.log('sign out')
-      store.dispatch('user/signOut')
-      this.$router.push('/')
     },
     getFileTime (orignTime) {
       const arr = /(.*)T(.*)\+(.*)/g.exec(orignTime)
@@ -288,8 +307,21 @@ export default {
 
         const url = `${uploadAddress}/api/v1/upload`
         console.log(url, uploadAuthorization)
-        store.commit('base/CHANGE_UPLOAD_PROGRESS_STATUS', true)
+        this.changeMyProgressStatus(true, () => {
+          this.progressTitle = '上传列表'
+          this.showWhat = true
+        })
         const currentPath = this.directory
+        store.commit('base/SET_UPLOADING_LIST', {
+          key: `${file.name}-${currentPath}`,
+          value: {
+            fileName: file.name,
+            fileSize: file.size,
+            path: currentPath,
+            currentValue: 0,
+            maxValue: file.size
+          }
+        })
         axios.request({
           url,
           method: 'POST',
@@ -304,7 +336,7 @@ export default {
               value: {
                 fileName: file.name,
                 fileSize: file.size,
-                path: this.directory,
+                path: currentPath,
                 currentValue: event.loaded,
                 maxValue: event.total
               }
@@ -318,15 +350,15 @@ export default {
             console.log(res)
             store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
             if (Object.keys(store.state.base.uploadingList).length === 0) {
-              store.commit('base/CHANGE_UPLOAD_PROGRESS_STATUS', false)
+              store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
             }
             store.dispatch('base/getFileList')
           })
-          .catch((e) => {
+          .catch(e => {
             if (e.toString() !== 'Cancel') {
               console.log(e)
               console.log(e.response)
-              this.signOut()
+              store.dispatch('user/signOut')
             }
           })
       }
@@ -337,7 +369,7 @@ export default {
       a.href = blob
       a.click()
     },
-    async downloadFile (fileId, fileName) {
+    async downloadFile (fileId, fileName, fileSize) {
       // 获取下载地址接口
       let downloadAddress = ''
       let downloadAuthorization = ''
@@ -349,6 +381,21 @@ export default {
         })
 
       console.log(downloadAuthorization)
+      this.changeMyProgressStatus(true, () => {
+        this.progressTitle = '下载列表'
+        this.showWhat = false
+      })
+      const currentPath = this.directory
+      store.commit('base/SET_DOWNLOADING_LIST', {
+        key: `${fileId}-${currentPath}`,
+        value: {
+          fileName,
+          fileSize: fileSize,
+          path: currentPath,
+          currentValue: 0,
+          maxValue: fileSize
+        }
+      })
       // 使用axios
       await axios.request({
         url: `${downloadAddress}/api/v1/download?file_id=${BigInt(fileId)}`,
@@ -357,15 +404,38 @@ export default {
           authorization: downloadAuthorization
         },
         onDownloadProgress: (event) => {
-          console.log('loaded', event.loaded)
-          console.log('total', event.total)
+          store.commit('base/SET_DOWNLOADING_LIST', {
+            key: `${fileId}-${currentPath}`,
+            value: {
+              fileName,
+              fileSize: fileSize,
+              path: currentPath,
+              currentValue: event.loaded,
+              maxValue: event.total
+            }
+          })
         },
+        cancelToken: new CancelToken((c) => {
+          store.commit('base/ADD_DOWNLOAD_CANCLE', c)
+        }),
         responseType: 'blob'
       })
         .then(res => {
+          console.log(res)
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${fileName}-${currentPath}`)
+          if (Object.keys(store.state.base.uploadingList).length === 0) {
+            store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
+          }
           const blob = new Blob([res.data])
           const blobURL = window.URL.createObjectURL(blob)
           this.downloadFileByA(fileName, blobURL)
+        })
+        .catch(e => {
+          if (e.toString() !== 'Cancel') {
+            console.log(e)
+            console.log(e.response)
+            store.dispatch('user/signOut')
+          }
         })
     },
     beforeCreateFolder () {
@@ -397,7 +467,7 @@ export default {
         .catch((e) => {
           console.log(e)
           console.log(e.response)
-          this.signOut()
+          store.dispatch('user/signOut')
         })
       this.isShowInputFileNameSlot = false
       this.inputFileName = ''
@@ -417,13 +487,16 @@ export default {
         .catch((e) => {
           console.log(e)
           console.log(e.response)
-          this.signOut()
+          store.dispatch('user/signOut')
         })
       this.isShowDeleteSlot = false
       this.deleteFileName = ''
     },
-    changeUploadProgress (status) {
-      store.commit('base/CHANGE_UPLOAD_PROGRESS_STATUS', status)
+    changeMyProgressStatus (status, callBack = null) {
+      if (callBack) {
+        callBack()
+      }
+      store.commit('base/CHANGE_MY_PROGRESS_STATUS', status)
     }
   },
   watch: {
