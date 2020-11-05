@@ -385,12 +385,12 @@ export default {
                     if (data.message === 'file not found') {
                       // 发送文件
                       console.log('开始发送文件')
-                      if (file.size < 104857600 / 20) {
+                      if (file.size < 104857600) {
                         console.log('upload')
                         uploadRequest(uploadAddress, uploadAuthorization, param, file.name, file.size, currentPath)
                       } else {
                         console.log('分块上传')
-                        multipartUpload(uploadAddress, uploadAuthorization, fileSize, file)
+                        multipartUpload(uploadAddress, uploadAuthorization, file, file.size, file.name, currentPath)
                       }
                     }
                   })
@@ -457,12 +457,12 @@ export default {
               if (data.message === 'file not found') {
                 // 发送文件
                 console.log('开始发送文件')
-                if (file.size < 104857600 / 20) {
+                if (file.size < 104857600) {
                   console.log('upload')
                   uploadRequest(uploadAddress, uploadAuthorization, param, file.name, file.size, currentPath)
                 } else {
                   console.log('分块上传')
-                  multipartUpload(uploadAddress, uploadAuthorization, fileSize, file)
+                  multipartUpload(uploadAddress, uploadAuthorization, file, file.size, file.name, currentPath)
                 }
               }
             })
