@@ -6,7 +6,9 @@
     "serve": "vue-cli-service serve",
     "test:api": "vue-cli-service serve --mode testapi",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "dev-inspect": "vue-cli-service inspect > inspect_dev_output.js",
+    "prod-inspect": "vue-cli-service inspect > inspect_prod_output.js --mode production"
   },
   "dependencies": {
     "axios": "^0.20.0",

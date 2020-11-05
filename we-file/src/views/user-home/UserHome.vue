@@ -128,7 +128,11 @@ import store from '@/store'
 import axios from 'axios'
 import qs from 'qs'
 import Popup from '@/components/Popup'
-import MyProgress from './components/MyProgress'
+import MyProgress from '@/components/MyProgress'
+// import FileWorker from '@/utils/fileWorker.worker.js'
+import HashWorker from '@/utils/hash.worker.js'
+import { sha256 } from 'js-sha256'
+import { uploadRequest, multipartUpload } from './js/request'
 
 const CancelToken = axios.CancelToken
 
@@ -293,74 +297,176 @@ export default {
         const file = e.target.files[0]
         const param = new FormData() // 创建form对象
         param.append('file', file)// 通过append向form对象添加数据
-        console.log(param.get('file')) // FormData私有类对象，访问不到，通过get判断值是否传进去
+        // console.log(param.get('file')) // FormData私有类对象，访问不到，通过get判断值是否传进去
+
+        // 当前目录
+        const currentPath = this.directory
+
+        // 显示上传列表
+        if (file) {
+          this.changeMyProgressStatus(true, () => {
+            this.progressTitle = '上传列表'
+            this.showWhat = true
+          })
+          store.commit('base/SET_UPLOADING_LIST', {
+            key: `${file.name}-${currentPath}`,
+            value: {
+              fileName: file.name,
+              fileSize: file.size,
+              path: currentPath,
+              currentValue: 0,
+              maxValue: file.size
+            }
+          })
+        }
 
         // 获取上传地址接口
         let uploadAddress = ''
         let uploadAuthorization = ''
-        await axios.get(`/api/v1/upload_address/${this.userId}?file_name=${file.name}&directory=${this.directory}`)
+        await axios.get(`/api/v1/user/upload_address?file_name=${file.name}&directory=${this.directory}`)
           .then(res => {
             console.log(res)
             uploadAddress = res.data.address
             uploadAuthorization = res.headers.authorization
           })
+        // 快传url
+        const fastUrl = `${uploadAddress}/api/v1/upload/try_fast`
+        // upload url
+        const uploadUrl = `${uploadAddress}/api/v1/upload`
+        // 全量hash
+        let allHash = ''
 
-        const url = `${uploadAddress}/api/v1/upload`
-        console.log(url, uploadAuthorization)
-        this.changeMyProgressStatus(true, () => {
-          this.progressTitle = '上传列表'
-          this.showWhat = true
-        })
-        const currentPath = this.directory
-        store.commit('base/SET_UPLOADING_LIST', {
-          key: `${file.name}-${currentPath}`,
-          value: {
-            fileName: file.name,
-            fileSize: file.size,
-            path: currentPath,
-            currentValue: 0,
-            maxValue: file.size
+        // 监听发送
+        const objNums = { nums: 0 }
+        const watchNums = new Proxy(objNums, {
+          get: (obj, prop) => {
+            return obj[prop]
+          },
+          set: (obj, prop, value) => {
+            if (prop === 'nums') {
+              obj[prop] = value
+              if (value === 2) {
+                console.log('开始发送全量hash', allHash)
+                axios.post(fastUrl, qs.stringify({
+                  file_hash: allHash
+                }), {
+                  headers: {
+                    authorization: uploadAuthorization
+                  }
+                })
+                  .then(res => {
+                    console.log(res)
+                    store.commit('base/SET_UPLOADING_LIST', {
+                      key: `${file.name}-${currentPath}`,
+                      value: {
+                        fileName: file.name,
+                        fileSize: file.size,
+                        path: currentPath,
+                        currentValue: file.size,
+                        maxValue: file.size
+                      }
+                    })
+                    store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
+                    if (Object.keys(store.state.base.uploadingList).length === 0) {
+                      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
+                    }
+                    store.dispatch('base/getFileList')
+                  })
+                  .catch((e) => {
+                    const data = e.response.data
+                    console.log(data)
+                    if (data.message === 'conflict error') {
+                      console.log('该目录已经有该文件')
+                      store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
+                      if (Object.keys(store.state.base.uploadingList).length === 0) {
+                        store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
+                      }
+                    }
+                    if (data.message === 'file not found') {
+                      // 发送文件
+                      console.log('开始发送文件')
+                      if (file.size < 104857600 / 20) {
+                        console.log('upload')
+                        uploadRequest(uploadAddress, uploadAuthorization, param, file.name, file.size, currentPath)
+                      } else {
+                        console.log('分块上传')
+                        multipartUpload(uploadAddress, uploadAuthorization, fileSize, file)
+                      }
+                    }
+                  })
+              }
+            }
+            return true
           }
         })
-        axios.request({
-          url,
-          method: 'POST',
-          headers: {
-            authorization: uploadAuthorization,
-            'Content-Type': 'multipart/form-data'
-          },
-          data: param,
-          onUploadProgress: (event) => {
-            store.commit('base/SET_UPLOADING_LIST', {
-              key: `${file.name}-${currentPath}`,
-              value: {
-                fileName: file.name,
-                fileSize: file.size,
-                path: currentPath,
-                currentValue: event.loaded,
-                maxValue: event.total
+
+        // 计算全量hash
+        const fileAllHashWorker = new HashWorker()
+        fileAllHashWorker.postMessage(file)
+        fileAllHashWorker.onmessage = (e) => {
+          allHash = e.data
+          console.log('全量hash: ', allHash)
+          watchNums.nums++
+        }
+
+        // 计算抽样hash
+        console.log('开始抽样hash 计算')
+        const fileSize = file.size
+        const offset = 5 * 1024 * 1024
+        const chunks = []
+        let cur = 0
+        while (cur < fileSize) {
+          // 最后一块全部
+          if (cur + offset >= fileSize) {
+            chunks.push(file.slice(cur, fileSize))
+          } else {
+            // 前面部分前后各10字节
+            const end = cur + offset
+            chunks.push(file.slice(cur, cur + 10))
+            chunks.push(file.slice(end - 10, end))
+          }
+          cur += offset
+        }
+
+        const fileReader2 = new FileReader()
+        fileReader2.readAsArrayBuffer(new Blob(chunks))
+        fileReader2.onload = async function () {
+          const fileSamplingHash = sha256(fileReader2.result)
+          console.log('抽样hash: ', fileSamplingHash)
+
+          // 快速上传接口
+          console.log('快速上传：', fastUrl, uploadAuthorization)
+          axios.post(fastUrl, qs.stringify({
+            file_sampling_hash: fileSamplingHash
+          }), {
+            headers: {
+              authorization: uploadAuthorization
+            }
+          })
+            .then(res => {
+              console.log(res)
+              if (res.data.message === 'find sampling hash, need file total hash') {
+                // 发送全量hash
+                console.log('准备发送全量hash')
+                watchNums.nums++
               }
             })
-          },
-          cancelToken: new CancelToken((c) => {
-            store.commit('base/ADD_UPLOAD_CANCLE', c)
-          })
-        })
-          .then(res => {
-            console.log(res)
-            store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
-            if (Object.keys(store.state.base.uploadingList).length === 0) {
-              store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
-            }
-            store.dispatch('base/getFileList')
-          })
-          .catch(e => {
-            if (e.toString() !== 'Cancel') {
-              console.log(e)
-              console.log(e.response)
-              store.dispatch('user/signOut')
-            }
-          })
+            .catch((e) => {
+              const data = e.response.data
+              console.log(data)
+              if (data.message === 'file not found') {
+                // 发送文件
+                console.log('开始发送文件')
+                if (file.size < 104857600 / 20) {
+                  console.log('upload')
+                  uploadRequest(uploadAddress, uploadAuthorization, param, file.name, file.size, currentPath)
+                } else {
+                  console.log('分块上传')
+                  multipartUpload(uploadAddress, uploadAuthorization, fileSize, file)
+                }
+              }
+            })
+        }
       }
     },
     downloadFileByA (name, blob) {
@@ -373,7 +479,7 @@ export default {
       // 获取下载地址接口
       let downloadAddress = ''
       let downloadAuthorization = ''
-      await axios.get(`/api/v1/download_address/${this.userId}?file_id=${BigInt(fileId)}&file_name=${fileName}&directory=${this.directory}`)
+      await axios.get(`/api/v1/user/download_address?file_id=${BigInt(fileId)}&file_name=${fileName}&directory=${this.directory}`)
         .then(res => {
           console.log(res)
           downloadAddress = res.data.address
@@ -455,7 +561,7 @@ export default {
     async createFolder () {
       console.log('create folder')
       if (this.inputFileName === '') return
-      axios.post(`/api/v1/file_list/${this.userId}`, qs.stringify({
+      axios.post('/api/v1/user/file_list', qs.stringify({
         csrf_token: this.token,
         directory: this.directory,
         name: this.inputFileName
@@ -479,7 +585,7 @@ export default {
     async deleteFile () {
       console.log('delete file')
       console.log(this.deleteFileName, this.directory, this.token)
-      await axios.delete(`/api/v1/file_list/${this.userId}?name=${this.deleteFileName}&directory=${this.directory}&csrf_token=${this.token}`)
+      await axios.delete(`/api/v1/user/file_list?name=${this.deleteFileName}&directory=${this.directory}&csrf_token=${this.token}`)
         .then(res => {
           console.log(res)
           store.dispatch('base/getFileList')

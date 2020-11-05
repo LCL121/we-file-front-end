@@ -6,7 +6,7 @@ import './directive'
 import './icon/iconfont'
 
 if (process.env.VUE_APP_TESTAPI) {
-  import('./utils/tryAPI')
+  import('./tryFiles/tryAPI')
     .then((module) => {
       console.log('已开启Test API 模式！')
       module.tryAPI()

@@ -43,7 +43,7 @@ export const tryAPI = async () => {
 
   // 测试获取目录接口
   let directory = null
-  await axios.get(`/api/v1/file_list/${userId}?directory=/`)
+  await axios.get(`/api/v1/user/file_list/${userId}?directory=/`)
     .then(res => {
       console.log(res)
       directory = res.data
@@ -56,7 +56,7 @@ export const tryAPI = async () => {
   // 测试获取下载地址接口
   let downloadAddress = ''
   let downloadAuthorization = ''
-  await axios.get(`/api/v1/download_address/${userId}?file_id=${BigInt(file1.file_id)}&file_name=${file1.file_name}&directory=${directory.directory}`)
+  await axios.get(`/api/v1/user/download_address/${userId}?file_id=${BigInt(file1.file_id)}&file_name=${file1.file_name}&directory=${directory.directory}`)
     .then(res => {
       console.log(res)
       downloadAddress = res.data.address
@@ -111,7 +111,7 @@ export const tryAPI = async () => {
   //   // 测试获取上传地址接口
   //   let uploadAddress = ''
   //   let uploadAuthorization = ''
-  //   await axios.get(`/api/v1/upload_address/${userId}?file_name=${file.name}&directory=/`)
+  //   await axios.get(`/api/v1/user/upload_address/${userId}?file_name=${file.name}&directory=/`)
   //     .then(res => {
   //       console.log(res)
   //       uploadAddress = res.data.address
@@ -168,7 +168,7 @@ export const tryMultipartUpload = async () => {
     // 测试获取上传地址接口
     let uploadAddress = ''
     let uploadAuthorization = ''
-    await axios.get(`/api/v1/upload_address/${userId}?file_name=${file.name}&directory=/`)
+    await axios.get(`/api/v1/user/upload_address/${userId}?file_name=${file.name}&directory=/`)
       .then(res => {
         console.log(res)
         uploadAddress = res.data.address

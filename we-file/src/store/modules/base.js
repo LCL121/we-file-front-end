@@ -13,7 +13,7 @@ const state = {
 
 const actions = {
   getFileList ({ commit, state }, data) {
-    axios.get(`/api/v1/file_list/${store.state.user.userId}?directory=${state.currentDirectory}`)
+    axios.get(`/api/v1/user/file_list?directory=${state.currentDirectory}`)
       .then(res => {
         const data = res.data
         console.log(data)
