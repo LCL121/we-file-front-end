@@ -92,13 +92,24 @@ export default {
   border-bottom: 1px solid #f2f6fd;
 }
 
+@media screen and (min-width: 801px) {
+  .my-progress {
+    width: px2rem(600);
+    margin-right: px2rem(50);
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .my-progress {
+    width: px2rem(450);
+  }
+}
+
 .my-progress {
   position: fixed;
   bottom: 0;
   right: 0;
   height: px2rem(400);
-  width: px2rem(600);
-  margin-right: px2rem(50);
   z-index: 100;
   background: #fff;
   box-shadow: 0 0 10px #ccc;
@@ -153,6 +164,9 @@ export default {
         flex: 1;
         padding-left: px2rem(16);
         box-sizing: border-box;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
 
       span:nth-child(1) {

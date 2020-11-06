@@ -68,7 +68,7 @@ export default {
   data () {
     return {
       index: 0,
-      navShow: true,
+      navShow: false,
       isShowSignOutSlot: false
     }
   },

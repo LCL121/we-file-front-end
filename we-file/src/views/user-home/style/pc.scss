@@ -1,64 +1,17 @@
 @import '@/style/index.scss';
+@import "./style/variables.scss";
 
-$nav-height: px2rem(110);
-$buttons-height: px2rem(55);
-$bread-height: px2rem(16);
-$white: #fff;
-$blue: #09AAFF;
-$nav-color: #888;
 $list-first-width: px2rem(330);
+$user-home-item-height: px2rem(44);
 
 @media screen and (min-width:801px) {
   .user-home-nav {
     height: $nav-height;
-    display: flex;
-    flex-direction: column;
-    color: $nav-color;
-    font-size: 12px;
-    cursor: default;
 
     .user-home-buttons {
-      height: $buttons-height;
-      padding: px2rem(11) px2rem(10);
-      box-sizing: border-box;
 
       .user-home-button-icon {
-        height: px2rem(33);
         min-width: px2rem(84);
-        font-size: 13px;
-        margin: 0 px2rem(5);
-        vertical-align: baseline;
-        border-radius: $default-border-radius;
-        padding: 0 px2rem(10);
-        cursor: pointer;
-      }
-
-      .user-home-button-icon:nth-child(1) {
-        background: $blue;
-        color: $white;
-      }
-
-      .user-home-button-icon:nth-child(n+2) {
-        background: $white;
-        border: 1px solid $blue;
-        color: $blue;
-      }
-    }
-
-    .bread-crumb {
-      height: $bread-height;
-      padding-right: px2rem(16);
-
-      a {
-        color: $nav-color;
-        padding-left: px2rem(16);
-        position: relative;
-      }
-
-      a:nth-child(n+2)::before {
-        content: '>';
-        position: absolute;
-        left: px2rem(4);
       }
     }
 
@@ -91,18 +44,10 @@ $list-first-width: px2rem(330);
   }
 
   .user-home-list {
-    color: $nav-color;
-    font-size: 12px;
-    cursor: default;
-    display: flex;
-    flex-direction: column;
-
     .user-home-item {
       display: flex;
-      line-height: px2rem(44);
-      height: px2rem(44);
-      border-bottom: 1px solid #f2f6fd;
-      box-sizing: border-box;
+      line-height: $user-home-item-height;
+      height: $user-home-item-height;
 
       .item-span {
         flex: 1;
@@ -124,13 +69,7 @@ $list-first-width: px2rem(330);
           overflow: hidden;
           text-overflow: ellipsis;
 
-          .file-icon {
-            font-size: 30px;
-            vertical-align: middle;
-          }
-
           .file-name {
-            padding-left: px2rem(16);
             vertical-align: middle;
             color: $nav-color;
           }
@@ -138,34 +77,11 @@ $list-first-width: px2rem(330);
 
         .item-right {
           width: px2rem(56);
-          font-size: 15px;
-          vertical-align: middle;
-          padding-right: px2rem(16);
-          margin-left: px2rem(16);
-          opacity: 0;
-          box-sizing: border-box;
-
-          svg {
-            cursor: pointer;
-          }
-
-          svg:nth-child(2) {
-            margin-left: px2rem(10);
-          }
         }
       }
 
       .item-span:nth-child(3) {
         min-width: px2rem(150);
-      }
-
-      .item-span:hover {
-        background: #F4FBFF;
-        border-color: #CBEDFF;
-
-        .item-right {
-          opacity: 1;
-        }
       }
     }
   }

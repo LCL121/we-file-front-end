@@ -633,9 +633,13 @@ export default {
 <style scoped lang="scss">
 @import "@/style/index.scss";
 @import "./style/pc.scss";
+@import "./style/mobile.scss";
 @import "./style/transition.scss";
+@import "./style/variables.scss";
 
 .popup-slot {
+  height: 50%;
+
   .popup-name {
     font-size: 15px;
   }
@@ -656,9 +660,112 @@ export default {
 
 .user-home {
   height: 100%;
+  .user-home-nav {
+    display: flex;
+    flex-direction: column;
+    color: $nav-color;
+    font-size: 12px;
+    cursor: default;
+
+    .user-home-buttons {
+      height: $buttons-height;
+      padding: px2rem(11) px2rem(10);
+      box-sizing: border-box;
+
+      .user-home-button-icon {
+        height: px2rem(33);
+        font-size: 13px;
+        margin: 0 px2rem(5);
+        vertical-align: baseline;
+        border-radius: $default-border-radius;
+        padding: 0 px2rem(10);
+        cursor: pointer;
+      }
+
+      .user-home-button-icon:nth-child(1) {
+        background: $blue;
+        color: $white;
+      }
+
+      .user-home-button-icon:nth-child(n + 2) {
+        background: $white;
+        border: 1px solid $blue;
+        color: $blue;
+      }
+    }
+
+    .bread-crumb {
+      height: $bread-height;
+      line-height: $bread-height;
+      padding-right: px2rem(16);
+      border-bottom: 1px solid #f2f6fd;
+
+      a {
+        color: $nav-color;
+        padding-left: px2rem(16);
+        position: relative;
+      }
+
+      a:nth-child(n + 2)::before {
+        content: ">";
+        position: absolute;
+        left: px2rem(4);
+      }
+    }
+  }
+
   .user-home-list {
     height: calc(100% - #{$nav-height});
     overflow-y: auto;
+    color: $nav-color;
+    font-size: 12px;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+
+    .user-home-item {
+      border-bottom: 1px solid #f2f6fd;
+      box-sizing: border-box;
+
+      .item-span:nth-child(1) {
+        .item-left {
+          .file-icon {
+            font-size: 30px;
+            vertical-align: middle;
+          }
+
+          .file-name {
+            padding-left: px2rem(16);
+          }
+        }
+
+        .item-right {
+          font-size: 15px;
+          vertical-align: middle;
+          padding-right: px2rem(16);
+          margin-left: px2rem(16);
+          opacity: 0;
+          box-sizing: border-box;
+
+          svg {
+            cursor: pointer;
+          }
+
+          svg:nth-child(2) {
+            margin-left: px2rem(10);
+          }
+        }
+      }
+
+      .item-span:hover {
+        background: #f4fbff;
+        border-color: #cbedff;
+
+        .item-right {
+          opacity: 1;
+        }
+      }
+    }
   }
 }
 </style>
