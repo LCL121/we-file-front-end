@@ -1,6 +1,12 @@
 <template>
-  <form class="sign-in" @submit.prevent="">
-    <p v-if="message" class="home-message">{{message}}</p>
+  <form
+    class="sign-in"
+    @submit.prevent=""
+  >
+    <p
+      v-if="message"
+      class="home-message"
+    >{{message}}</p>
     <div class="fm-input">
       <label for="email"></label>
       <input

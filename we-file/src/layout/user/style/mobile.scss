@@ -60,6 +60,7 @@ $selected-color: #000;
       }
 
       .user-main-view {
+        position: relative;
         height: calc(100vh - #{$title-height});
         flex: 1;
       }

@@ -129,10 +129,10 @@ import axios from 'axios'
 import qs from 'qs'
 import Popup from '@/components/Popup'
 import MyProgress from '@/components/MyProgress'
-// import FileWorker from '@/utils/fileWorker.worker.js'
 import HashWorker from '@/utils/hash.worker.js'
 import { sha256 } from 'js-sha256'
 import { uploadRequest, multipartUpload } from './js/request'
+import { notyf } from '@/utils/message'
 
 const CancelToken = axios.CancelToken
 
@@ -294,13 +294,19 @@ export default {
     },
     initFileInput () {
       this.$refs.input.onchange = async (e) => {
-        const file = e.target.files[0]
-        const param = new FormData() // 创建form对象
-        param.append('file', file)// 通过append向form对象添加数据
-        // console.log(param.get('file')) // FormData私有类对象，访问不到，通过get判断值是否传进去
-
         // 当前目录
         const currentPath = this.directory
+
+        const file = e.target.files[0]
+
+        if (`${file.name}-${currentPath}` in store.state.base.uploadingList) {
+          console.log('该文件正在上传中')
+          notyf.error('该文件正在上传中')
+          return
+        }
+
+        const param = new FormData() // 创建form对象
+        param.append('file', file)// 通过append向form对象添加数据
 
         // 显示上传列表
         if (file) {
@@ -323,12 +329,24 @@ export default {
         // 获取上传地址接口
         let uploadAddress = ''
         let uploadAuthorization = ''
-        await axios.get(`/api/v1/user/upload_address?file_name=${file.name}&directory=${this.directory}`)
+        await axios.get(`/api/v1/user/upload_address?file_name=${file.name}&directory=${this.directory}`, {
+          timeout: 5000
+        })
           .then(res => {
             console.log(res)
             uploadAddress = res.data.address
             uploadAuthorization = res.headers.authorization
           })
+          .catch(e => {
+            if (e.message.indexOf('timeout') !== -1) {
+              notyf.error('上传地址请求失败')
+            }
+            store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
+            if (Object.keys(store.state.base.uploadingList).length === 0) {
+              store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
+            }
+          })
+
         // 快传url
         const fastUrl = `${uploadAddress}/api/v1/upload/try_fast`
         // upload url
@@ -377,12 +395,12 @@ export default {
                     console.log(data)
                     if (data.message === 'conflict error') {
                       console.log('该目录已经有该文件')
+                      notyf.error('该目录已经有该文件')
                       store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
                       if (Object.keys(store.state.base.uploadingList).length === 0) {
                         store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
                       }
-                    }
-                    if (data.message === 'file not found') {
+                    } else if (data.message === 'file not found') {
                       // 发送文件
                       console.log('开始发送文件')
                       if (file.size < 104857600) {
@@ -391,6 +409,12 @@ export default {
                       } else {
                         console.log('分块上传')
                         multipartUpload(uploadAddress, uploadAuthorization, file, file.size, file.name, currentPath)
+                      }
+                    } else {
+                      notyf.error('文件上传失败')
+                      store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
+                      if (Object.keys(store.state.base.uploadingList).length === 0) {
+                        store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
                       }
                     }
                   })
@@ -464,6 +488,8 @@ export default {
                   console.log('分块上传')
                   multipartUpload(uploadAddress, uploadAuthorization, file, file.size, file.name, currentPath)
                 }
+              } else {
+                notyf.error('文件上传失败')
               }
             })
         }
@@ -476,22 +502,19 @@ export default {
       a.click()
     },
     async downloadFile (fileId, fileName, fileSize) {
-      // 获取下载地址接口
-      let downloadAddress = ''
-      let downloadAuthorization = ''
-      await axios.get(`/api/v1/user/download_address?file_id=${BigInt(fileId)}&file_name=${fileName}&directory=${this.directory}`)
-        .then(res => {
-          console.log(res)
-          downloadAddress = res.data.address
-          downloadAuthorization = res.headers.authorization
-        })
+      // 显示下载列表
+      const currentPath = this.directory
 
-      console.log(downloadAuthorization)
+      if (`${BigInt(fileId)}-${currentPath}` in store.state.base.downloadingList) {
+        console.log('该文件正在下载中')
+        notyf.error('该文件正在下载中')
+        return
+      }
+
       this.changeMyProgressStatus(true, () => {
         this.progressTitle = '下载列表'
         this.showWhat = false
       })
-      const currentPath = this.directory
       store.commit('base/SET_DOWNLOADING_LIST', {
         key: `${BigInt(fileId)}-${currentPath}`,
         value: {
@@ -502,6 +525,31 @@ export default {
           maxValue: fileSize
         }
       })
+
+      // 获取下载地址接口
+      let downloadAddress = ''
+      let downloadAuthorization = ''
+      await axios.get(`/api/v1/user/download_address?file_id=${BigInt(fileId)}&file_name=${fileName}&directory=${this.directory}`, {
+        timeout: 5000
+      })
+        .then(res => {
+          console.log(res)
+          downloadAddress = res.data.address
+          downloadAuthorization = res.headers.authorization
+        })
+        .catch(e => {
+          console.log(e)
+          if (e.message.indexOf('timeout') !== -1) {
+            notyf.error('下载地址请求失败')
+          }
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${BigInt(fileId)}-${currentPath}`)
+          if (Object.keys(store.state.base.downloadingList).length === 0) {
+            store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
+          }
+        })
+
+      console.log(downloadAuthorization)
+
       // 使用axios
       await axios.request({
         url: `${downloadAddress}/api/v1/download?file_id=${BigInt(fileId)}`,
@@ -542,6 +590,10 @@ export default {
             console.log(e.response)
             store.dispatch('user/signOut')
           }
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${BigInt(fileId)}-${currentPath}`)
+          if (Object.keys(store.state.base.downloadingList).length === 0) {
+            store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
+          }
         })
     },
     beforeCreateFolder () {
@@ -565,15 +617,17 @@ export default {
         csrf_token: this.token,
         directory: this.directory,
         name: this.inputFileName
-      }))
+      }), {
+        timeout: 5000
+      })
         .then(res => {
           console.log(res)
           store.dispatch('base/getFileList')
         })
         .catch((e) => {
-          console.log(e)
-          console.log(e.response)
-          store.dispatch('user/signOut')
+          if (e.message.indexOf('timeout') !== -1) {
+            notyf.error('创建文件夹请求失败')
+          }
         })
       this.isShowInputFileNameSlot = false
       this.inputFileName = ''
@@ -585,15 +639,17 @@ export default {
     async deleteFile () {
       console.log('delete file')
       console.log(this.deleteFileName, this.directory, this.token)
-      await axios.delete(`/api/v1/user/file_list?name=${this.deleteFileName}&directory=${this.directory}&csrf_token=${this.token}`)
+      await axios.delete(`/api/v1/user/file_list?name=${this.deleteFileName}&directory=${this.directory}&csrf_token=${this.token}`, {
+        timeout: 5000
+      })
         .then(res => {
           console.log(res)
           store.dispatch('base/getFileList')
         })
         .catch((e) => {
-          console.log(e)
-          console.log(e.response)
-          store.dispatch('user/signOut')
+          if (e.message.indexOf('timeout') !== -1) {
+            notyf.error('删除请求失败')
+          }
         })
       this.isShowDeleteSlot = false
       this.deleteFileName = ''

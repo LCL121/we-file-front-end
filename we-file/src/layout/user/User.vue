@@ -23,12 +23,12 @@
           <router-link
             :to="`/user/user-home?path=${userHomePath}`"
             :class="{selected: index === 0}"
-            @click.native="changeSeleted(0)"
+            @click.native="changeSeleted()"
           >我的云盘</router-link>
           <router-link
             to="/user/user-details"
             :class="{selected: index === 1}"
-            @click.native="changeSeleted(1)"
+            @click.native="changeSeleted()"
           >个人中心</router-link>
           <router-link
             to=""
@@ -67,7 +67,6 @@ export default {
   },
   data () {
     return {
-      index: 0,
       navShow: false,
       isShowSignOutSlot: false
     }
@@ -75,11 +74,17 @@ export default {
   computed: {
     userHomePath () {
       return store.state.base.currentDirectory
+    },
+    index () {
+      if (this.$route.fullPath === '/user/user-details') {
+        return 1
+      } else {
+        return 0
+      }
     }
   },
   methods: {
-    changeSeleted (item) {
-      this.index = item
+    changeSeleted () {
       store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
       if (document.documentElement.clientWidth < 800) this.navShow = false
     },
@@ -104,10 +109,19 @@ export default {
     }
   },
   beforeRouteEnter (to, from, next) {
-    if (store.state.user.userId === '') {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+    if (userInfo) {
+      store.commit('user/SET_TOKEN', userInfo.csrf_token)
+      store.commit('user/SET_EMAIL', userInfo.email)
+      store.commit('user/SET_NAME', userInfo.name)
+      store.commit('user/SET_PROFILE', userInfo.profile)
+      store.commit('user/SET_ROLE_ID', userInfo.role_id)
+      store.commit('user/SET_ROLE_NAME', userInfo.role_name)
+      store.commit('user/SET_USER_ID', userInfo.user_id)
+      next()
+    } else {
       next('/signin')
     }
-    next()
   }
 }
 </script>
