@@ -1,5 +1,6 @@
 import store from '@/store'
 import axios from 'axios'
+import { notyf } from '@/utils/message'
 
 const state = {
   currentDirectory: '',
@@ -13,7 +14,9 @@ const state = {
 
 const actions = {
   getFileList ({ commit, state }, data) {
-    axios.get(`/api/v1/user/file_list?directory=${state.currentDirectory}`)
+    axios.get(`/api/v1/user/file_list?directory=${state.currentDirectory}`, {
+      timeout: 5000
+    })
       .then(res => {
         const data = res.data
         console.log(data)
@@ -30,8 +33,12 @@ const actions = {
         commit('SET_FILE_LIST', fileList)
       })
       .catch(e => {
-        console.log(e)
-        store.dispatch('user/signOut')
+        if (e.message.indexOf('timeout') !== -1) {
+          notyf.error('目录请求失败')
+        } else {
+          console.log(e)
+          store.dispatch('user/signOut')
+        }
       })
   }
 }

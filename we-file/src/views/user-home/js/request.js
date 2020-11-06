@@ -1,6 +1,7 @@
 import axios from 'axios'
 import store from '@/store'
 import qs from 'qs'
+import { notyf } from '@/utils/message'
 
 const CancelToken = axios.CancelToken
 
@@ -50,6 +51,10 @@ export const uploadRequest = (
         console.log(e)
         console.log(e.response)
         store.dispatch('user/signOut')
+      }
+      store.commit('base/DELETE_UPLOADING_LIST', `${fileName}-${currentPath}`)
+      if (Object.keys(store.state.base.uploadingList).length === 0) {
+        store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
       }
     })
 }
@@ -111,6 +116,9 @@ export const multipartUpload = async (
       multiChunkSize = data.chunk_size
       multiFileSize = data.file_size
       multiUploadId = data.upload_id
+    })
+    .catch(e => {
+      notyf.error('文件上传失败')
     })
 
   console.log(multiChunkCount, multiChunkSize, multiFileSize, multiUploadId)
@@ -178,6 +186,7 @@ export const multipartUpload = async (
                 console.log(e)
                 console.log(e.response)
                 console.log(e.response.data)
+                notyf.error('文件上传失败')
               })
           } else {
             startSend()
