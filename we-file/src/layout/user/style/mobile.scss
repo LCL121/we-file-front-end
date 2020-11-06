@@ -1,4 +1,4 @@
-// <= 500px
+// <= 800px
 @import '@/style/index.scss';
 
 $title-height: px2rem(60);
@@ -9,7 +9,7 @@ $mask-bgcolr: rgba(0, 0, 0, .5);
 $default-color: #8e9aa5;
 $selected-color: #000;
 
-@media screen and (max-width:500px) {
+@media screen and (max-width:800px) {
   .user {
     display: flex;
     flex-direction: column;
@@ -37,7 +37,7 @@ $selected-color: #000;
         width: $nav-width;
         height: 100vh;
         background: $nav-bgcolor;
-        z-index: 100;
+        z-index: 901;
         padding-top: px2rem(200);
         box-sizing: border-box;
 
@@ -50,7 +50,7 @@ $selected-color: #000;
           width: 80%;
           @include textCenter(px2rem(40));
           margin: px2rem(15) auto;
-          border-radius: px2rem(4);
+          border-radius: $default-border-radius;
           color: $default-color;
         }
 
@@ -70,6 +70,7 @@ $selected-color: #000;
       background: $mask-bgcolr;
       width: 100vw;
       height: 100vh;
+      z-index: 900;
     }
   }
 }

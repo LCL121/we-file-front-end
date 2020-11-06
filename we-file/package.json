@@ -6,12 +6,15 @@
     "serve": "vue-cli-service serve",
     "test:api": "vue-cli-service serve --mode testapi",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "dev-inspect": "vue-cli-service inspect > inspect_dev_output.js",
+    "prod-inspect": "vue-cli-service inspect > inspect_prod_output.js --mode production"
   },
   "dependencies": {
     "axios": "^0.20.0",
     "core-js": "^3.6.5",
     "js-sha256": "^0.9.0",
+    "nprogress": "^0.2.0",
     "qs": "^6.9.4",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",

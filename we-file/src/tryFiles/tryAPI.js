@@ -19,44 +19,44 @@ export const tryAPI = async () => {
   //     console.log(res)
   //   })
 
-  // 测试登录接口
-  let userId = 0
-  await axios.post('/api/v1/user/sign_in', qs.stringify({
-    email: 'we@qq.com',
-    password: '123456789'
-  }))
-    .then(res => {
-      console.log(res.data)
-      userId = BigInt(res.data.user_id)
-    })
-
-  // // 测试注册接口
+  // 测试注册接口
   // await axios.post('/api/v1/user/sign_up', qs.stringify({
-  //   email: 'string',
+  //   email: '1391436522@qq.com',
   //   name: 'string',
-  //   password: 'stringst',
+  //   password: '123abcABC',
   //   verify_code: 'string'
   // }))
   //   .then(res => {
   //     console.log(res.data)
   //   })
 
+  // 测试登录接口
+  let userId = 0
+  await axios.post('/api/v1/user/sign_in', qs.stringify({
+    email: '1391436522@qq.com',
+    password: '123abcABC'
+  }))
+    .then(res => {
+      console.log(res.data)
+      userId = BigInt(res.data.user_id)
+    })
+
   // 测试获取目录接口
   let directory = null
-  await axios.get(`/api/v1/file_list/${userId}?directory=/`)
+  await axios.get(`/api/v1/user/file_list/${userId}?directory=/`)
     .then(res => {
       console.log(res)
       directory = res.data
     })
   console.log(directory)
 
-  const file1 = directory.files[4]
+  const file1 = directory.files[1]
   console.log('fileId: ', BigInt(file1.file_id))
 
   // 测试获取下载地址接口
   let downloadAddress = ''
   let downloadAuthorization = ''
-  await axios.get(`/api/v1/download_address/${userId}?file_id=${BigInt(file1.file_id)}&file_name=${file1.file_name}&directory=${directory.directory}`)
+  await axios.get(`/api/v1/user/download_address/${userId}?file_id=${BigInt(file1.file_id)}&file_name=${file1.file_name}&directory=${directory.directory}`)
     .then(res => {
       console.log(res)
       downloadAddress = res.data.address
@@ -66,36 +66,36 @@ export const tryAPI = async () => {
   console.log(downloadAuthorization)
 
   // // 测试下载功能
-  // // 使用fetch
-  // await fetch(`${downloadAddress}/api/v1/download`, {
-  //   method: 'GET',
-  //   headers: {
-  //     authorization: downloadAuthorization
-  //   }
-  // })
-  //   .then(res => res.blob())
-  //   .then(data => {
-  //     const blobURL = window.URL.createObjectURL(data)
-  //     downloadFile(file1.file_name, blobURL)
-  //   })
-
-  // 使用axios
-  await axios.request({
-    url: `${downloadAddress}/api/v1/download`,
+  // 使用fetch
+  await fetch(`${downloadAddress}/api/v1/download`, {
     method: 'GET',
     headers: {
       authorization: downloadAuthorization
-    },
-    responseType: 'blob'
+    }
   })
-    .then(res => {
-      // console.log(res)
-      // console.log(res.headers)
-      // console.log(res.data)
-      const blob = new Blob([res.data])
-      const blobURL = window.URL.createObjectURL(blob)
+    .then(res => res.blob())
+    .then(data => {
+      const blobURL = window.URL.createObjectURL(data)
       downloadFile(file1.file_name, blobURL)
     })
+
+  // 使用axios
+  // await axios.request({
+  //   url: `${downloadAddress}/api/v1/download`,
+  //   method: 'GET',
+  //   headers: {
+  //     authorization: downloadAuthorization
+  //   },
+  //   responseType: 'blob'
+  // })
+  //   .then(res => {
+  //     // console.log(res)
+  //     // console.log(res.headers)
+  //     // console.log(res.data)
+  //     const blob = new Blob([res.data])
+  //     const blobURL = window.URL.createObjectURL(blob)
+  //     downloadFile(file1.file_name, blobURL)
+  //   })
 
   // // 测试上传功能
   // const inputDom = document.createElement('input')
@@ -111,7 +111,7 @@ export const tryAPI = async () => {
   //   // 测试获取上传地址接口
   //   let uploadAddress = ''
   //   let uploadAuthorization = ''
-  //   await axios.get(`/api/v1/upload_address/${userId}?file_name=${file.name}&directory=/`)
+  //   await axios.get(`/api/v1/user/upload_address/${userId}?file_name=${file.name}&directory=/`)
   //     .then(res => {
   //       console.log(res)
   //       uploadAddress = res.data.address
@@ -168,7 +168,7 @@ export const tryMultipartUpload = async () => {
     // 测试获取上传地址接口
     let uploadAddress = ''
     let uploadAuthorization = ''
-    await axios.get(`/api/v1/upload_address/${userId}?file_name=${file.name}&directory=/`)
+    await axios.get(`/api/v1/user/upload_address/${userId}?file_name=${file.name}&directory=/`)
       .then(res => {
         console.log(res)
         uploadAddress = res.data.address

@@ -7,12 +7,18 @@
 }
 
 html,
-body {
+body,
+ul,
+li {
   margin: 0;
   padding: 0;
   border: 0;
   vertical-align: baseline;
   overflow: hidden;
+}
+
+ul li {
+  list-style: none;
 }
 
 body {
@@ -67,7 +73,7 @@ input {
     padding: px2rem(5) px2rem(20);
     color: #000;
     border: px2rem(1) solid #e5e5e5;
-    border-radius: px2rem(4);
+    border-radius: $default-border-radius;
     box-sizing: border-box;
     background-color: #f9f9f9;
   }
@@ -85,7 +91,7 @@ input {
     height: px2rem(40);
     padding: px2rem(5) px2rem(20);
     color: #fff;
-    border-radius: px2rem(4);
+    border-radius: $default-border-radius;
     box-sizing: border-box;
     background-color: #f40;
     cursor: pointer;

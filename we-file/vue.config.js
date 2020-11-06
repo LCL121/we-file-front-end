@@ -63,6 +63,24 @@ module.exports = {
               console.log(chalk.red(JSON.stringify(data)))
               res.send(data)
             })
+        } else if (req.method === 'DELETE') {
+          console.log()
+          axios.delete(`http://www.wefile.com:8070${req.url}`, {
+            headers: req.headers
+          })
+            .then((tempRes) => {
+              const data = tempRes.data
+              res.header('authorization', tempRes.headers['authorization'])
+              res.header('content-type', tempRes.headers['content-type'])
+              console.log(chalk.green(`The data is: ${JSON.stringify(data)}`))
+              res.send(data)
+            })
+            .catch(e => {
+              console.log(chalk.red('delete 出错！'))
+              const data = e.response.data
+              console.log(chalk.red(JSON.stringify(data)))
+              res.send(data)
+            })
         }
       })
     }

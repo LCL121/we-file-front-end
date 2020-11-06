@@ -1,6 +1,6 @@
 <template>
   <div class="user">
-    <div class="user-title">
+    <header class="user-title">
       <div
         class="nav-button"
         @click="showNav"
@@ -13,15 +13,15 @@
         </svg>
       </div>
       WeFile
-    </div>
+    </header>
     <div class="user-main">
       <transition name="nav-transition">
         <nav
           class="user-nav"
-          v-if="navShow"
+          v-show="navShow"
         >
           <router-link
-            to="/user/user-home"
+            :to="`/user/user-home?path=${userHomePath}`"
             :class="{selected: index === 0}"
             @click.native="changeSeleted(0)"
           >我的云盘</router-link>
@@ -32,7 +32,7 @@
           >个人中心</router-link>
           <router-link
             to=""
-            @click.native="signOut"
+            @click.native="judgeisSignOut"
           >退出登录</router-link>
         </nav>
       </transition>
@@ -42,33 +42,46 @@
     </div>
     <div
       class="user-mask"
-      v-if="navShow"
+      v-show="navShow"
       @click="hiddenNav"
     ></div>
+    <popup
+      v-if="isShowSignOutSlot"
+      :determineButton="() => { signOut() }"
+      :cancleButton="() => { this.isShowSignOutSlot = false }"
+    >
+      <p class="popup-name">有文件正在上传/下载中，如果退出任务将会停止</p>
+    </popup>
   </div>
 </template>
 
 <script>
 import store from '@/store'
 import { mapState } from 'vuex'
+import popup from '@/components/Popup'
 
 export default {
   name: 'User',
+  components: {
+    popup
+  },
   data () {
     return {
       index: 0,
-      navShow: !store.state.base.isMobileView
+      navShow: false,
+      isShowSignOutSlot: false
     }
   },
   computed: {
-    ...mapState({
-      isMobileView: state => state.base.isMobileView
-    })
+    userHomePath () {
+      return store.state.base.currentDirectory
+    }
   },
   methods: {
     changeSeleted (item) {
       this.index = item
-      !this.isMobileView || (this.navShow = false)
+      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
+      if (document.documentElement.clientWidth < 800) this.navShow = false
     },
     showNav () {
       this.navShow = true
@@ -76,9 +89,18 @@ export default {
     hiddenNav () {
       this.navShow = false
     },
+    judgeisSignOut () {
+      if (Object.keys(store.state.base.uploadingList).length === 0 &&
+        Object.keys(store.state.base.downloadingList).length === 0) {
+        store.dispatch('user/signOut')
+      } else {
+        this.isShowSignOutSlot = true
+      }
+    },
     signOut () {
+      this.isShowSignOutSlot = false
+      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
       store.dispatch('user/signOut')
-      this.$router.push('/')
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -94,6 +116,11 @@ export default {
 @import "./style/transition.scss";
 @import "./style/pc.scss";
 @import "./style/mobile.scss";
+
+.popup-name {
+  font-size: 15px;
+  text-align: center;
+}
 
 .user {
   min-height: 100vh;

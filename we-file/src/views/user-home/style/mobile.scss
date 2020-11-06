@@ -1,0 +1,70 @@
+@import '@/style/index.scss';
+@import "./variables.scss";
+
+$user-home-item-height: px2rem(70);
+
+// 360px
+@media screen and (max-width:400px) {
+  .user-home-button-icon .icon {
+    display: none !important;
+  }
+}
+
+@media screen and (max-width:800px) {
+  .bread-crumb {
+    font-size: 13px;
+  }
+
+  .menu-list {
+    display: none;
+  }
+
+  .user-home-list {
+    .user-home-item {
+      display: flex;
+      position: relative;
+      line-height: $user-home-item-height;
+      height: $user-home-item-height;
+
+      .item-span:nth-child(1) {
+        width: px2rem(400);
+        flex: 1;
+        display: flex;
+        .item-left {
+          padding-left: px2rem(16);
+          flex: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+
+          .file-name {
+            font-size: 13px;
+            vertical-align: middle;
+            color: #212732;
+          }
+        }
+
+        .item-right {
+          width: px2rem(90);
+        }
+      }
+
+      .item-span:nth-child(n+2) {
+        position: absolute;
+        height: px2rem(14);
+        line-height: px2rem(14);
+        bottom: px2rem(3);
+      }
+
+      .item-span:nth-child(2) {
+        min-width: px2rem(60);
+        left: px2rem(270);
+      }
+
+      .item-span:nth-child(3) {
+        min-width: px2rem(130);
+        left: px2rem(80);
+      }
+    }
+  }
+}

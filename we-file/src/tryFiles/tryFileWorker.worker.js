@@ -56,7 +56,7 @@ self.addEventListener('message', function (e) {
     let multiFileSize = 0
     let multiUploadId = ''
     const url = `${uploadAddress}/api/v1/multipart_upload/init`
-    console.log('快速上传：', url, uploadAuthorization, fileSize)
+    console.log('分块上传初始化：', url, uploadAuthorization, fileSize)
     await axios.post(url, qs.stringify({
       file_size: fileSize.toString()
     }), {
