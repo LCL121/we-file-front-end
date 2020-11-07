@@ -163,6 +163,7 @@ $menu-height: px2rem(33);
 
 .user-group {
   height: 100%;
+  cursor: default;
   .user-group-buttons {
     @include buttonList();
 
@@ -185,17 +186,17 @@ $menu-height: px2rem(33);
     overflow-y: auto;
 
     .user-group-item {
-      margin-left: px2rem(16);
       line-height: $user-group-item-height;
       height: $user-group-item-height;
       font-size: 14px;
       color: #888;
-      cursor: default;
+      box-sizing: border-box;
       @include borderBottom();
 
       div {
         min-width: $list-first-width;
         max-width: px2rem(500);
+        padding-left: px2rem(16);
 
         .user-group-item-icon1 {
           margin-right: px2rem(16);
@@ -205,7 +206,8 @@ $menu-height: px2rem(33);
           float: right;
           line-height: $user-group-item-height;
           height: $user-group-item-height;
-          padding-right: px2rem(16);
+          margin-right: px2rem(40);
+          padding: 0 px2rem(10);
           cursor: pointer;
           opacity: 0;
         }

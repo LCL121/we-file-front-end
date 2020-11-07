@@ -5,7 +5,7 @@ $user-home-item-height: px2rem(70);
 
 // 360px
 @media screen and (max-width:400px) {
-  .user-home-button-icon .icon {
+  .user-home-button-item .icon {
     display: none !important;
   }
 }
