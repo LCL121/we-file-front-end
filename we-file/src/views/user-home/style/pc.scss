@@ -1,7 +1,6 @@
 @import '@/style/index.scss';
 @import "./style/variables.scss";
 
-$list-first-width: px2rem(330);
 $user-home-item-height: px2rem(44);
 
 @media screen and (min-width:801px) {
@@ -18,7 +17,7 @@ $user-home-item-height: px2rem(44);
     .menu-list {
       flex: 1;
       display: flex;
-      border-bottom: 1px solid #f2f6fd;
+      @include borderBottom();
       box-sizing: border-box;
 
       span {

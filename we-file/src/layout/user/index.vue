@@ -34,7 +34,7 @@
             to="/user/user-group"
             :class="{selected: index === 2}"
             @click.native="changeSeleted()"
-          >共享文件</router-link>
+          >共享小组</router-link>
           <router-link
             to=""
             @click.native="judgeisSignOut"

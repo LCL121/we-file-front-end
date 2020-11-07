@@ -1,5 +1,41 @@
+@import "./function.scss";
+@import "./variables.scss";
+
 @mixin textCenter($h) {
   height: $h;
   line-height: $h;
   text-align: center;
+}
+
+@mixin buttonList {
+  height: $buttons-height;
+  padding: px2rem(11) px2rem(10);
+  box-sizing: border-box;
+}
+
+@mixin buttonItem {
+  height: px2rem(33);
+  font-size: 13px;
+  margin: 0 px2rem(5);
+  vertical-align: baseline;
+  border-radius: $default-border-radius;
+  padding: 0 px2rem(10);
+  cursor: pointer;
+}
+
+@mixin buttonItem1 {
+  @include buttonItem();
+  background: $blue;
+  color: $white;
+}
+
+@mixin buttonItem2 {
+  @include buttonItem();
+  background: $white;
+  border: 1px solid $blue;
+  color: $blue;
+}
+
+@mixin borderBottom {
+  border-bottom: 1px solid #f2f6fd;
 }

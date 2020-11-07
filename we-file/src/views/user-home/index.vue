@@ -3,9 +3,9 @@
     <div class="user-home-nav">
       <div class="user-home-buttons">
         <button
-          v-for="(item, index) in buttonsIcon"
+          v-for="(item, index) in buttonList"
           :key="index"
-          class="user-home-button-icon"
+          class="user-home-button-item"
           @click="item.click"
         >
           <svg
@@ -144,7 +144,7 @@ export default {
   },
   data () {
     return {
-      buttonsIcon: [
+      buttonList: [
         {
           svg: '<use xlink:href="#icon-shangchuan"></use>',
           text: '上传',
@@ -724,29 +724,14 @@ export default {
     cursor: default;
 
     .user-home-buttons {
-      height: $buttons-height;
-      padding: px2rem(11) px2rem(10);
-      box-sizing: border-box;
+      @include buttonList();
 
-      .user-home-button-icon {
-        height: px2rem(33);
-        font-size: 13px;
-        margin: 0 px2rem(5);
-        vertical-align: baseline;
-        border-radius: $default-border-radius;
-        padding: 0 px2rem(10);
-        cursor: pointer;
+      .user-home-button-item:nth-child(1) {
+        @include buttonItem1();
       }
 
-      .user-home-button-icon:nth-child(1) {
-        background: $blue;
-        color: $white;
-      }
-
-      .user-home-button-icon:nth-child(n + 2) {
-        background: $white;
-        border: 1px solid $blue;
-        color: $blue;
+      .user-home-button-item:nth-child(n + 2) {
+        @include buttonItem2();
       }
     }
 
@@ -754,7 +739,7 @@ export default {
       height: $bread-height;
       line-height: $bread-height;
       padding-right: px2rem(16);
-      border-bottom: 1px solid #f2f6fd;
+      @include borderBottom();
 
       a {
         color: $nav-color;
@@ -780,7 +765,7 @@ export default {
     flex-direction: column;
 
     .user-home-item {
-      border-bottom: 1px solid #f2f6fd;
+      @include borderBottom();
       box-sizing: border-box;
 
       .item-span:nth-child(1) {
