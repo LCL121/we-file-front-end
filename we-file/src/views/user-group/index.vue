@@ -32,7 +32,7 @@
           >
             <use xlink:href="#icon-xiaozu"></use>
           </svg>
-          {{item.name}}
+          <router-link :to="`/user/group-home?groupId=${getBigInt(item.group_id)}&path=/`">{{item.name}}</router-link>
           <svg
             class="icon user-group-item-icon2"
             aria-hidden="true"
@@ -304,6 +304,10 @@ $menu-height: px2rem(33);
 
         .user-group-item-icon1 {
           margin-right: px2rem(16);
+        }
+
+        a {
+          color: #888;
         }
 
         .user-group-item-icon2 {

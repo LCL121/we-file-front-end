@@ -1,0 +1,89 @@
+@import '@/style/index.scss';
+@import "./style/variables.scss";
+
+$group-home-item-height: px2rem(44);
+
+@media screen and (min-width:801px) {
+  .group-home-nav {
+    height: $nav-height;
+
+    .group-home-buttons {
+
+      .group-home-button-item {
+        min-width: px2rem(84);
+      }
+    }
+
+    .menu-list {
+      flex: 1;
+      display: flex;
+      @include borderBottom();
+      box-sizing: border-box;
+
+      span {
+        flex: 1;
+        padding-left: px2rem(16);
+        line-height: $nav-height - $buttons-height - $bread-height;
+        box-sizing: border-box;
+      }
+
+      span:nth-child(1) {
+        min-width: $list-first-width;
+      }
+
+      span:nth-child(3) {
+        min-width: px2rem(150);
+      }
+
+      span:hover {
+        background: #F4FBFF;
+        border-color: #CBEDFF;
+      }
+    }
+  }
+
+  .group-home-list {
+    height: calc(100vh - #{$title-height + $nav-height});
+
+    .group-home-item {
+      display: flex;
+      line-height: $group-home-item-height;
+      height: $group-home-item-height;
+
+      .item-span {
+        flex: 1;
+        padding-left: px2rem(16);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .item-span:nth-child(1) {
+        min-width: $list-first-width;
+
+        .item-left {
+          flex: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+
+          .file-name {
+            vertical-align: middle;
+            color: $nav-color;
+          }
+        }
+
+        .item-right {
+          width: px2rem(56);
+        }
+      }
+
+      .item-span:nth-child(3) {
+        min-width: px2rem(150);
+      }
+    }
+  }
+}
