@@ -754,7 +754,6 @@ export default {
   }
 
   .user-home-list {
-    height: calc(100% - #{$nav-height});
     overflow-y: auto;
     color: $nav-color;
     font-size: 12px;

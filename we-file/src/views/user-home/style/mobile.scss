@@ -20,6 +20,8 @@ $user-home-item-height: px2rem(70);
   }
 
   .user-home-list {
+    height: calc(100vh - #{$title-height + $buttons-height + $bread-height});
+
     .user-home-item {
       display: flex;
       position: relative;

@@ -43,6 +43,8 @@ $user-home-item-height: px2rem(44);
   }
 
   .user-home-list {
+    height: calc(100vh - #{$title-height + $nav-height});
+
     .user-home-item {
       display: flex;
       line-height: $user-home-item-height;
