@@ -98,7 +98,7 @@ const mutations = {
   ADD_UPLOAD_CANCLE (state, uploadCancle) {
     state.uploadCancleList.push(uploadCancle)
   },
-  DELETE_ALL_UPLOAD_CANCLE () {
+  DELETE_ALL_UPLOAD_CANCLE (state) {
     while (state.uploadCancleList.length > 0) {
       state.uploadCancleList.pop()
     }
@@ -106,9 +106,47 @@ const mutations = {
   ADD_DOWNLOAD_CANCLE (state, downloadCancle) {
     state.downloadCancleList.push(downloadCancle)
   },
-  DELETE_ALL_DOWNLOAD_CANCLE () {
+  DELETE_ALL_DOWNLOAD_CANCLE (state) {
     while (state.downloadCancleList.length > 0) {
       state.downloadCancleList.pop()
+    }
+  },
+  CLEAR_ALL (state) {
+    const uploadCancleList = state.uploadCancleList
+    const downloadCancleList = state.downloadCancleList
+    if (uploadCancleList.length !== 0) {
+      for (const uploadCancle of uploadCancleList) {
+        uploadCancle()
+      }
+      // 清理uploadingList
+      for (const key of Object.keys(state.uploadingList)) {
+        delete state.uploadingList[key]
+      }
+      state.isShowMyProgress = false
+      // 清理uploadCancleList
+      while (state.uploadCancleList.length > 0) {
+        state.uploadCancleList.pop()
+      }
+    }
+    if (downloadCancleList.length !== 0) {
+      for (const downloadCancle of downloadCancleList) {
+        downloadCancle()
+      }
+      // 清理downloadingList
+      for (const key of Object.keys(state.downloadingList)) {
+        delete state.downloadingList[key]
+      }
+      state.isShowMyProgress = false
+      // 清理downloadCancleList
+      while (state.downloadCancleList.length > 0) {
+        state.downloadCancleList.pop()
+      }
+    }
+
+    state.currentDirectory = ''
+    // 清理fileList
+    while (state.fileList.length > 0) {
+      state.fileList.pop()
     }
   }
 }

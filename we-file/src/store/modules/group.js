@@ -2,8 +2,11 @@ import axios from 'axios'
 import store from '@/store'
 import { notyf } from '@/utils/message'
 
+const defaultGroupRoute = '/user/user-group'
+
 const state = {
-  groupList: []
+  groupList: [],
+  groupRoute: defaultGroupRoute
 }
 
 const actions = {
@@ -36,6 +39,15 @@ const actions = {
 const mutations = {
   SET_GROUP_LIST (state, groupList) {
     state.groupList = groupList
+  },
+  SET_GROUP_ROUTE (state, groupRoute) {
+    state.groupRoute = groupRoute
+  },
+  CLEAR_ALL (state) {
+    state.groupRoute = defaultGroupRoute
+    while (state.groupList.length > 0) {
+      state.groupList.pop()
+    }
   }
 }
 

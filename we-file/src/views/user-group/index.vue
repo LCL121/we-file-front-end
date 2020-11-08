@@ -36,6 +36,7 @@
           <svg
             class="icon user-group-item-icon2"
             aria-hidden="true"
+            @click="enterGroupDetails(getBigInt(item.group_id))"
           >
             <use xlink:href="#icon-xiangqing"></use>
           </svg>
@@ -45,35 +46,71 @@
     <!-- 创建小组 -->
     <popup
       v-if="isShowCreateGroup"
-      :determineButton="() => { this.determine() }"
-      :cancleButton="() => { this.cancle() }"
+      :determineButton="() => { this.createDetermine() }"
+      :cancleButton="() => { this.createCancle() }"
     >
       <form @click.prevent="">
         <div class="fm-input">
-          <label for="name"></label>
+          <label for="createName"></label>
           <input
             type="text"
-            id="name"
+            id="createName"
             v-focus
             placeholder="组名"
             pattern="^.{1,64}$"
             autocomplete
             required
-            ref="name"
-            v-model="name"
+            ref="createName"
+            v-model="createName"
           >
         </div>
         <div class="fm-input">
-          <label for="password"></label>
+          <label for="createPassword"></label>
           <input
             type="password"
-            id="password"
+            id="createPassword"
             placeholder="密码 8-64位，包含大小写字母、数字"
             pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,64}$"
             required
-            ref="password"
+            ref="createPassword"
             autocomplete
-            v-model="password"
+            v-model="createPassword"
+          >
+        </div>
+      </form>
+    </popup>
+    <!-- 加入小组 -->
+    <popup
+      v-if="isShowJoinGroup"
+      :determineButton="() => { this.joinDetermine() }"
+      :cancleButton="() => { this.joinCancle() }"
+    >
+      <form @click.prevent="">
+        <div class="fm-input">
+          <label for="joinGroupId"></label>
+          <input
+            type="text"
+            id="joinGroupId"
+            v-focus
+            placeholder="小组ID"
+            pattern="^.{1,64}$"
+            autocomplete
+            required
+            ref="joinGroupId"
+            v-model="joinGroupId"
+          >
+        </div>
+        <div class="fm-input">
+          <label for="joinPassword"></label>
+          <input
+            type="password"
+            id="joinPassword"
+            placeholder="密码 8-64位，包含大小写字母、数字"
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^]{8,64}$"
+            required
+            ref="joinPassword"
+            autocomplete
+            v-model="joinPassword"
           >
         </div>
       </form>
@@ -87,6 +124,7 @@ import qs from 'qs'
 import store from '@/store'
 import popup from '@/components/Popup'
 import { notyf } from '@/utils/message'
+import { getBigInt } from '@/utils/utils'
 
 export default {
   name: 'UserGroup',
@@ -106,12 +144,19 @@ export default {
         {
           svg: '<use xlink:href="#icon-jiaru"></use>',
           text: '加入小组',
-          click: () => { console.log('join group') }
+          click: () => {
+            this.isShowJoinGroup = true
+          }
         }
       ],
-      name: '',
-      password: '',
-      isShowCreateGroup: false
+      // 创建小组
+      createName: '',
+      createPassword: '',
+      isShowCreateGroup: false,
+      // 加入小组
+      joinGroupId: '',
+      joinPassword: '',
+      isShowJoinGroup: false
     }
   },
   computed: {
@@ -120,15 +165,15 @@ export default {
     }
   },
   methods: {
-    determine () {
+    createDetermine () {
       if (
-        this.$refs.password.validity.valid &&
-        this.$refs.name.validity.valid
+        this.$refs.createPassword.validity.valid &&
+        this.$refs.createName.validity.valid
       ) {
         axios.post('/api/v1/user/group', qs.stringify({
           csrf_token: store.state.user.token,
-          name: this.name,
-          password: this.password
+          name: this.createName,
+          password: this.createPassword
         }))
           .then(res => {
             console.log(res)
@@ -137,19 +182,57 @@ export default {
           .catch(e => {
             notyf.error('创建请求失败')
           })
+        this.createName = ''
+        this.createPassword = ''
         this.isShowCreateGroup = false
       } else {
         notyf.error('请按正确格式填写')
       }
     },
-    cancle () {
+    createCancle () {
+      this.createName = ''
+      this.createPassword = ''
       this.isShowCreateGroup = false
     },
-    getBigInt (num) {
-      return `${BigInt(num)}`
-    }
+    joinDetermine () {
+      console.log('determine join')
+      if (
+        this.$refs.joinPassword.validity.valid &&
+        this.$refs.joinGroupId.validity.valid
+      ) {
+        axios.post('/api/v1/user/group_list', qs.stringify({
+          csrf_token: store.state.user.token,
+          group_id: this.joinGroupId,
+          password: this.joinPassword
+        }))
+          .then(res => {
+            console.log(res)
+            store.dispatch('group/getGroupList')
+          })
+          .catch(e => {
+            notyf.error('加入请求失败')
+          })
+        this.joinGroupId = ''
+        this.joinPassword = ''
+        this.isShowJoinGroup = false
+      } else {
+        notyf.error('请按正确格式填写')
+      }
+    },
+    joinCancle () {
+      console.log('cancle join')
+      this.joinGroupId = ''
+      this.joinPassword = ''
+      this.isShowJoinGroup = false
+    },
+    enterGroupDetails (id) {
+      console.log(id)
+      this.$router.push(`/user/group-details?groupId=${id}`)
+    },
+    getBigInt
   },
   mounted () {
+    store.commit('group/SET_GROUP_ROUTE', this.$route.fullPath)
     store.dispatch('group/getGroupList')
   }
 }
@@ -158,8 +241,31 @@ export default {
 <style scoped lang="scss">
 @import "@/style/index.scss";
 
-$user-group-item-height: px2rem(44);
+$user-group-item-height-pc: px2rem(44);
+$user-group-item-height-mobile: px2rem(70);
 $menu-height: px2rem(33);
+
+@media screen and (max-width: 800px) {
+  .user-group-item {
+    line-height: $user-group-item-height-mobile;
+    height: $user-group-item-height-mobile;
+    .user-group-item-icon2 {
+      line-height: $user-group-item-height-mobile;
+      height: $user-group-item-height-mobile;
+    }
+  }
+}
+
+@media screen and (min-width: 801px) {
+  .user-group-item {
+    line-height: $user-group-item-height-pc;
+    height: $user-group-item-height-pc;
+    .user-group-item-icon2 {
+      line-height: $user-group-item-height-pc;
+      height: $user-group-item-height-pc;
+    }
+  }
+}
 
 .user-group {
   height: 100%;
@@ -186,8 +292,6 @@ $menu-height: px2rem(33);
     overflow-y: auto;
 
     .user-group-item {
-      line-height: $user-group-item-height;
-      height: $user-group-item-height;
       font-size: 14px;
       color: #888;
       box-sizing: border-box;
@@ -204,8 +308,6 @@ $menu-height: px2rem(33);
 
         .user-group-item-icon2 {
           float: right;
-          line-height: $user-group-item-height;
-          height: $user-group-item-height;
           margin-right: px2rem(40);
           padding: 0 px2rem(10);
           cursor: pointer;

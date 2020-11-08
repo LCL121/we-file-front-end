@@ -73,7 +73,7 @@
               aria-hidden="true"
               @click="() => {beforeDelete(item.file_name)}"
             >
-              <use xlink:href="#icon-shanchu"></use>
+              <use xlink:href="#icon-shanchu-blue"></use>
             </svg>
           </span>
         </span>
@@ -133,6 +133,7 @@ import HashWorker from '@/utils/hash.worker.js'
 import { sha256 } from 'js-sha256'
 import { uploadRequest, multipartUpload } from './js/request'
 import { notyf } from '@/utils/message'
+import { getFileTime, getBigInt } from '@/utils/utils'
 
 const CancelToken = axios.CancelToken
 
@@ -235,10 +236,7 @@ export default {
     addSep () {
       return this.directory === '/' ? '' : '/'
     },
-    getFileTime (orignTime) {
-      const arr = /(.*)T(.*)\+(.*)/g.exec(orignTime)
-      return `${arr[1]} ${arr[2]}`
-    },
+    getFileTime,
     getFileIcon (isDirectory, fileName) {
       if (isDirectory) {
         return '<use xlink:href="#icon-file"></use>'
@@ -505,7 +503,7 @@ export default {
       // 显示下载列表
       const currentPath = this.directory
 
-      if (`${BigInt(fileId)}-${currentPath}` in store.state.base.downloadingList) {
+      if (`${getBigInt(fileId)}-${currentPath}` in store.state.base.downloadingList) {
         console.log('该文件正在下载中')
         notyf.error('该文件正在下载中')
         return
@@ -516,7 +514,7 @@ export default {
         this.showWhat = false
       })
       store.commit('base/SET_DOWNLOADING_LIST', {
-        key: `${BigInt(fileId)}-${currentPath}`,
+        key: `${getBigInt(fileId)}-${currentPath}`,
         value: {
           fileName,
           fileSize: fileSize,
@@ -529,7 +527,7 @@ export default {
       // 获取下载地址接口
       let downloadAddress = ''
       let downloadAuthorization = ''
-      await axios.get(`/api/v1/user/download_address?file_id=${BigInt(fileId)}&file_name=${fileName}&directory=${this.directory}`, {
+      await axios.get(`/api/v1/user/download_address?file_id=${getBigInt(fileId)}&file_name=${fileName}&directory=${this.directory}`, {
         timeout: 5000
       })
         .then(res => {
@@ -542,7 +540,7 @@ export default {
           if (e.message.indexOf('timeout') !== -1) {
             notyf.error('下载地址请求失败')
           }
-          store.commit('base/DELETE_DOWNLOADING_LIST', `${BigInt(fileId)}-${currentPath}`)
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${getBigInt(fileId)}-${currentPath}`)
           if (Object.keys(store.state.base.downloadingList).length === 0) {
             store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
           }
@@ -552,14 +550,14 @@ export default {
 
       // 使用axios
       await axios.request({
-        url: `${downloadAddress}/api/v1/download?file_id=${BigInt(fileId)}`,
+        url: `${downloadAddress}/api/v1/download?file_id=${getBigInt(fileId)}`,
         method: 'GET',
         headers: {
           authorization: downloadAuthorization
         },
         onDownloadProgress: (event) => {
           store.commit('base/SET_DOWNLOADING_LIST', {
-            key: `${BigInt(fileId)}-${currentPath}`,
+            key: `${getBigInt(fileId)}-${currentPath}`,
             value: {
               fileName,
               fileSize: fileSize,
@@ -576,7 +574,7 @@ export default {
       })
         .then(res => {
           console.log(res)
-          store.commit('base/DELETE_DOWNLOADING_LIST', `${BigInt(fileId)}-${currentPath}`)
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${getBigInt(fileId)}-${currentPath}`)
           if (Object.keys(store.state.base.downloadingList).length === 0) {
             store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
           }
@@ -590,7 +588,7 @@ export default {
             console.log(e.response)
             store.dispatch('user/signOut')
           }
-          store.commit('base/DELETE_DOWNLOADING_LIST', `${BigInt(fileId)}-${currentPath}`)
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${getBigInt(fileId)}-${currentPath}`)
           if (Object.keys(store.state.base.downloadingList).length === 0) {
             store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
           }

@@ -31,7 +31,7 @@
             @click.native="changeSeleted()"
           >个人中心</router-link>
           <router-link
-            to="/user/user-group"
+            :to="groupRoute"
             :class="{selected: index === 2}"
             @click.native="changeSeleted()"
           >共享小组</router-link>
@@ -79,6 +79,9 @@ export default {
   computed: {
     userHomePath () {
       return store.state.base.currentDirectory
+    },
+    groupRoute () {
+      return store.state.group.groupRoute
     },
     index () {
       if (this.$route.path === '/user/user-home') {
