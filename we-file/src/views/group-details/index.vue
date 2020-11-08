@@ -51,6 +51,13 @@
         </div>
       </div>
     </div>
+    <popup
+      v-if="isShowDeleteGroup"
+      :determineButton="() => { this.deleteDetermine() }"
+      :cancleButton="() => { this.deleteCancle() }"
+    >
+      <p class="popup-name">是否确定{{deleteText}}</p>
+    </popup>
   </div>
 </template>
 
@@ -60,16 +67,21 @@ import qs from 'qs'
 import { getFileTime, getBigInt } from '@/utils/utils'
 import store from '@/store'
 import { notyf } from '@/utils/message'
+import popup from '@/components/Popup'
 
 export default {
   name: 'GroupDetails',
+  components: {
+    popup
+  },
   data () {
     return {
       groupInfo: [],
       groupNumber: [],
       deleteText: '',
       groupId: '',
-      ownerId: ''
+      ownerId: '',
+      isShowDeleteGroup: false
     }
   },
   methods: {
@@ -82,11 +94,7 @@ export default {
     },
     dealGroup () {
       console.log('deal group')
-      if (this.isOwner()) {
-        this.deleteGroup()
-      } else {
-        this.quitGroup()
-      }
+      this.isShowDeleteGroup = true
     },
     deleteGroup () {
       console.log('delete group')
@@ -111,6 +119,19 @@ export default {
           console.log(e)
           notyf.error('退出小组失败')
         })
+    },
+    deleteDetermine () {
+      console.log('determine group')
+      if (this.isOwner()) {
+        this.deleteGroup()
+      } else {
+        this.quitGroup()
+      }
+      this.isShowDeleteGroup = false
+    },
+    deleteCancle () {
+      console.log('delete group')
+      this.isShowDeleteGroup = false
     }
   },
   mounted () {
@@ -175,7 +196,7 @@ export default {
   }
 }
 
-@media screen and (min-width:801px) {
+@media screen and (min-width: 801px) {
   .group-icon {
     font-size: 18px;
   }
@@ -257,6 +278,11 @@ export default {
         }
       }
     }
+  }
+
+  .popup-name {
+    margin: 0 auto;
+    font-size: 15px;
   }
 }
 </style>
