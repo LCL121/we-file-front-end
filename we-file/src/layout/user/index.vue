@@ -36,7 +36,7 @@
             @click.native="changeSeleted()"
           >共享小组</router-link>
           <router-link
-            to=""
+            to="/signin"
             @click.native="judgeisSignOut"
           >退出登录</router-link>
         </nav>

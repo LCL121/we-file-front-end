@@ -32,7 +32,10 @@
           >
             <use xlink:href="#icon-xiaozu"></use>
           </svg>
-          <router-link :to="`/user/group-home?groupId=${getBigInt(item.group_id)}&path=/`">{{item.name}}</router-link>
+          <router-link
+            @click.native="clearFileList"
+            :to="`/user/group-home?groupId=${getBigInt(item.group_id)}&groupName=${item.name}&path=/`"
+          >{{item.name}}</router-link>
           <svg
             class="icon user-group-item-icon2"
             aria-hidden="true"
@@ -229,7 +232,10 @@ export default {
       console.log(id)
       this.$router.push(`/user/group-details?groupId=${id}`)
     },
-    getBigInt
+    getBigInt,
+    clearFileList () {
+      store.commit('group/CLEAR_FILE_LIST')
+    }
   },
   mounted () {
     store.commit('group/SET_GROUP_ROUTE', this.$route.fullPath)

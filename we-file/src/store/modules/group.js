@@ -50,7 +50,7 @@ const actions = {
           }
         }
         console.log(data)
-        const fileList = data.sort((a, b) => {
+        const fileList = data.files.sort((a, b) => {
           if (a.is_directory && !b.is_directory) return -1
           else return 1
         })
@@ -79,6 +79,11 @@ const mutations = {
   },
   SET_FILE_LIST (state, fileList) {
     state.fileList = fileList
+  },
+  CLEAR_FILE_LIST (state) {
+    while (state.fileList.length > 0) {
+      state.fileList.pop()
+    }
   },
   CLEAR_ALL (state) {
     state.groupRoute = defaultGroupRoute

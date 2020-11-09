@@ -38,6 +38,7 @@
 
 <script>
 import store from '@/store'
+import { getFileSize } from '@/utils/utils'
 
 export default {
   name: 'MyProgress',
@@ -48,15 +49,7 @@ export default {
     }
   },
   methods: {
-    getFileSize (fileSize) {
-      const suffix = ['Byte', 'KB', 'M', 'G', 'T']
-      let num = 0
-      while (fileSize >= 1024) {
-        fileSize /= 1024
-        num++
-      }
-      return `${Math.round(fileSize * 10) / 10}${suffix[num]}`
-    },
+    getFileSize,
     getFileStatus (current, max) {
       if (current === 0) {
         return '等待中'

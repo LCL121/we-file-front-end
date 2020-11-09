@@ -23,6 +23,7 @@
         >
       </div>
       <div class="bread-crumb">
+        <router-link to="/user/user-group">返回小组列表</router-link>
         <router-link
           :to="`/user/group-home?groupId=${groupId}&path=${item.path}`"
           v-for="item in getBreadCrumb()"
@@ -77,7 +78,7 @@
             </svg>
           </span>
         </span>
-        <span class="item-span">{{getFileSize(item.is_directory, item.file_size)}}</span>
+        <span class="item-span">{{getFileSize(item.file_size, item.is_directory)}}</span>
         <span class="item-span">{{getFileTime(item.upload_at)}}</span>
       </div>
     </div>
@@ -132,7 +133,13 @@ import MyProgress from '@/components/MyProgress'
 import HashWorker from '@/utils/hash.worker.js'
 import { sha256 } from 'js-sha256'
 import { notyf } from '@/utils/message'
-import { getFileTime, getBigInt } from '@/utils/utils'
+import {
+  getFileTime,
+  getBigInt,
+  getFileIcon,
+  getFileSize,
+  downloadFileByA
+} from '@/utils/utils'
 
 const CancelToken = axios.CancelToken
 
@@ -222,7 +229,7 @@ export default {
         if (i === 0) {
           arr[0] = {
             path: '/',
-            name: '全部文件'
+            name: this.groupName
           }
         } else {
           arr[i] = {
@@ -237,59 +244,8 @@ export default {
       return this.directory === '/' ? '' : '/'
     },
     getFileTime,
-    getFileIcon (isDirectory, fileName) {
-      if (isDirectory) {
-        return '<use xlink:href="#icon-file"></use>'
-      } else {
-        const suffix = /.*\.(.*)/.exec(fileName)[1]
-        switch (suffix) {
-          case 'xlsx':
-            return '<use xlink:href="#icon-file"></use>'
-          case 'ppt':
-            return '<use xlink:href="#icon-ppt"></use>'
-          case 'doc':
-          case 'docx':
-            return '<use xlink:href="#icon-word"></use>'
-          case 'mp3':
-          case 'wav':
-            return '<use xlink:href="#icon-music"></use>'
-          case 'html':
-            return '<use xlink:href="#icon-html"></use>'
-          case 'zip':
-          case 'rar':
-            return '<use xlink:href="#icon-zip"></use>'
-          case 'mp4':
-          case 'avi':
-            return '<use xlink:href="#icon-video"></use>'
-          case 'txt':
-            return '<use xlink:href="#icon-txt"></use>'
-          case 'ios':
-            return '<use xlink:href="#icon-ios"></use>'
-          case 'exe':
-            return '<use xlink:href="#icon-exe"></use>'
-          case 'psd':
-            return '<use xlink:href="#icon-psd"></use>'
-          case 'png':
-          case 'jpg':
-          case 'gif':
-            return '<use xlink:href="#icon-image"></use>'
-          case 'pdf':
-            return '<use xlink:href="#icon-pdf"></use>'
-          default:
-            return '<use xlink:href="#icon-undefined"></use>'
-        }
-      }
-    },
-    getFileSize (isDirectory, fileSize) {
-      if (isDirectory) return '-'
-      const suffix = ['Byte', 'KB', 'M', 'G', 'T']
-      let num = 0
-      while (fileSize >= 1024) {
-        fileSize /= 1024
-        num++
-      }
-      return `${Math.round(fileSize * 10) / 10}${suffix[num]}`
-    },
+    getFileIcon,
+    getFileSize,
     initFileInput () {
       this.$refs.input.onchange = async (e) => {
         // 当前目录
@@ -390,12 +346,7 @@ export default {
           })
       }
     },
-    downloadFileByA (name, blob) {
-      const a = document.createElement('a')
-      a.download = name
-      a.href = blob
-      a.click()
-    },
+    downloadFileByA,
     async downloadFile (fileId, fileName, fileSize) {
       // 显示下载列表
       const currentPath = this.directory
@@ -559,6 +510,9 @@ export default {
   },
   watch: {
     $route (to, from) {
+      // console.log(to.path)
+      // if (to.path === '/user/group-home') {
+      store.commit('group/SET_GROUP_ROUTE', this.$route.fullPath)
       const path = to.query.path
       this.groupId = to.query.groupId
       if (path) {
@@ -568,11 +522,14 @@ export default {
       }
       store.dispatch('group/getFileList', this.groupId)
       this.initFileInput()
+      // }
     }
   },
   mounted () {
+    store.commit('group/SET_GROUP_ROUTE', this.$route.fullPath)
     const path = this.$route.query.path
     this.groupId = this.$route.query.groupId
+    this.groupName = this.$route.query.groupName
     if (path) {
       store.commit('group/SET_CURRENT_DIRECTORY', path)
     } else {
@@ -643,6 +600,7 @@ export default {
         color: $nav-color;
         padding-left: px2rem(16);
         position: relative;
+        font-size: 13.5px;
       }
 
       a:nth-child(n + 2)::before {
