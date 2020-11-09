@@ -31,7 +31,12 @@
             @click.native="changeSeleted()"
           >个人中心</router-link>
           <router-link
-            to=""
+            :to="groupRoute"
+            :class="{selected: index === 2}"
+            @click.native="changeSeleted()"
+          >共享小组</router-link>
+          <router-link
+            to="/signin"
             @click.native="judgeisSignOut"
           >退出登录</router-link>
         </nav>
@@ -75,11 +80,16 @@ export default {
     userHomePath () {
       return store.state.base.currentDirectory
     },
+    groupRoute () {
+      return store.state.group.groupRoute
+    },
     index () {
-      if (this.$route.fullPath === '/user/user-details') {
+      if (this.$route.path === '/user/user-home') {
+        return 0
+      } else if (this.$route.path === '/user/user-details') {
         return 1
       } else {
-        return 0
+        return 2
       }
     }
   },

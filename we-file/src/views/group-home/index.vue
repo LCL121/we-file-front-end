@@ -1,11 +1,11 @@
 <template>
-  <div class="user-home">
-    <div class="user-home-nav">
-      <div class="user-home-buttons">
+  <div class="group-home">
+    <div class="group-home-nav">
+      <div class="group-home-buttons">
         <button
-          v-for="(item, index) in buttonsIcon"
+          v-for="(item, index) in buttonList"
           :key="index"
-          class="user-home-button-icon"
+          class="group-home-button-item"
           @click="item.click"
         >
           <svg
@@ -23,8 +23,9 @@
         >
       </div>
       <div class="bread-crumb">
+        <router-link to="/user/user-group">返回小组列表</router-link>
         <router-link
-          :to="`/user/user-home?path=${item.path}`"
+          :to="`/user/group-home?groupId=${groupId}&path=${item.path}`"
           v-for="item in getBreadCrumb()"
           :key="item.path"
         >{{item.name}}</router-link>
@@ -36,9 +37,9 @@
         >{{item}}</span>
       </div>
     </div>
-    <div class="user-home-list">
+    <div class="group-home-list">
       <div
-        class="user-home-item"
+        class="group-home-item"
         v-for="item in fileList"
         :key="`${item.file_id}_${item.file_name}`"
       >
@@ -50,7 +51,7 @@
               v-html="getFileIcon(item.is_directory, item.file_name)"
             ></svg>
             <router-link
-              :to="`/user/user-home?path=${directory}${addSep()}${item.file_name}`"
+              :to="`/user/group-home?groupId=${groupId}&path=${directory}${addSep()}${item.file_name}`"
               class="file-name"
               v-if="item.is_directory"
             >{{item.file_name}}</router-link>
@@ -73,11 +74,11 @@
               aria-hidden="true"
               @click="() => {beforeDelete(item.file_name)}"
             >
-              <use xlink:href="#icon-shanchu"></use>
+              <use xlink:href="#icon-shanchu-blue"></use>
             </svg>
           </span>
         </span>
-        <span class="item-span">{{getFileSize(item.is_directory, item.file_size)}}</span>
+        <span class="item-span">{{getFileSize(item.file_size, item.is_directory)}}</span>
         <span class="item-span">{{getFileTime(item.upload_at)}}</span>
       </div>
     </div>
@@ -131,20 +132,26 @@ import Popup from '@/components/Popup'
 import MyProgress from '@/components/MyProgress'
 import HashWorker from '@/utils/hash.worker.js'
 import { sha256 } from 'js-sha256'
-import { uploadRequest, multipartUpload } from './js/request'
 import { notyf } from '@/utils/message'
+import {
+  getFileTime,
+  getBigInt,
+  getFileIcon,
+  getFileSize,
+  downloadFileByA
+} from '@/utils/utils'
 
 const CancelToken = axios.CancelToken
 
 export default {
-  name: 'UserHome',
+  name: 'GroupHome',
   components: {
     Popup,
     MyProgress
   },
   data () {
     return {
-      buttonsIcon: [
+      buttonList: [
         {
           svg: '<use xlink:href="#icon-shangchuan"></use>',
           text: '上传',
@@ -179,6 +186,7 @@ export default {
       menuList: ['文件名', '大小', '修改日期'],
       userId: store.state.user.userId,
       token: store.state.user.token,
+      groupId: '',
       // popup
       isShowInputFileNameSlot: false,
       isShowDeleteSlot: false,
@@ -191,10 +199,10 @@ export default {
   },
   computed: {
     directory () {
-      return store.state.base.currentDirectory
+      return store.state.group.currentDirectory
     },
     fileList () {
-      return store.state.base.fileList
+      return store.state.group.fileList
     },
     // my progress
     isShowMyProgress () {
@@ -221,7 +229,7 @@ export default {
         if (i === 0) {
           arr[0] = {
             path: '/',
-            name: '全部文件'
+            name: this.groupName
           }
         } else {
           arr[i] = {
@@ -235,63 +243,9 @@ export default {
     addSep () {
       return this.directory === '/' ? '' : '/'
     },
-    getFileTime (orignTime) {
-      const arr = /(.*)T(.*)\+(.*)/g.exec(orignTime)
-      return `${arr[1]} ${arr[2]}`
-    },
-    getFileIcon (isDirectory, fileName) {
-      if (isDirectory) {
-        return '<use xlink:href="#icon-file"></use>'
-      } else {
-        const suffix = /.*\.(.*)/.exec(fileName)[1]
-        switch (suffix) {
-          case 'xlsx':
-            return '<use xlink:href="#icon-file"></use>'
-          case 'ppt':
-            return '<use xlink:href="#icon-ppt"></use>'
-          case 'doc':
-          case 'docx':
-            return '<use xlink:href="#icon-word"></use>'
-          case 'mp3':
-          case 'wav':
-            return '<use xlink:href="#icon-music"></use>'
-          case 'html':
-            return '<use xlink:href="#icon-html"></use>'
-          case 'zip':
-          case 'rar':
-            return '<use xlink:href="#icon-zip"></use>'
-          case 'mp4':
-          case 'avi':
-            return '<use xlink:href="#icon-video"></use>'
-          case 'txt':
-            return '<use xlink:href="#icon-txt"></use>'
-          case 'ios':
-            return '<use xlink:href="#icon-ios"></use>'
-          case 'exe':
-            return '<use xlink:href="#icon-exe"></use>'
-          case 'psd':
-            return '<use xlink:href="#icon-psd"></use>'
-          case 'png':
-          case 'jpg':
-          case 'gif':
-            return '<use xlink:href="#icon-image"></use>'
-          case 'pdf':
-            return '<use xlink:href="#icon-pdf"></use>'
-          default:
-            return '<use xlink:href="#icon-undefined"></use>'
-        }
-      }
-    },
-    getFileSize (isDirectory, fileSize) {
-      if (isDirectory) return '-'
-      const suffix = ['Byte', 'KB', 'M', 'G', 'T']
-      let num = 0
-      while (fileSize >= 1024) {
-        fileSize /= 1024
-        num++
-      }
-      return `${Math.round(fileSize * 10) / 10}${suffix[num]}`
-    },
+    getFileTime,
+    getFileIcon,
+    getFileSize,
     initFileInput () {
       this.$refs.input.onchange = async (e) => {
         // 当前目录
@@ -329,183 +283,75 @@ export default {
         // 获取上传地址接口
         let uploadAddress = ''
         let uploadAuthorization = ''
-        await axios.get(`/api/v1/user/upload_address?file_name=${file.name}&directory=${this.directory}`, {
-          timeout: 5000
-        })
+        await axios.get(`/api/v1/user/group/upload_address?group_id=${this.groupId}&file_name=${file.name}&directory=${this.directory}`)
           .then(res => {
             console.log(res)
             uploadAddress = res.data.address
             uploadAuthorization = res.headers.authorization
           })
-          .catch(e => {
-            if (e.message.indexOf('timeout') !== -1) {
-              notyf.error('上传地址请求失败')
-            }
+        const url = `${uploadAddress}/api/v1/upload`
+        console.log(url, uploadAuthorization)
+        this.changeMyProgressStatus(true, () => {
+          this.progressTitle = '上传列表'
+          this.showWhat = true
+        })
+        store.commit('base/SET_UPLOADING_LIST', {
+          key: `${file.name}-${currentPath}`,
+          value: {
+            fileName: file.name,
+            fileSize: file.size,
+            path: currentPath,
+            currentValue: 0,
+            maxValue: file.size
+          }
+        })
+        axios.request({
+          url,
+          method: 'POST',
+          headers: {
+            authorization: uploadAuthorization,
+            'Content-Type': 'multipart/form-data'
+          },
+          data: param,
+          onUploadProgress: (event) => {
+            store.commit('base/SET_UPLOADING_LIST', {
+              key: `${file.name}-${currentPath}`,
+              value: {
+                fileName: file.name,
+                fileSize: file.size,
+                path: currentPath,
+                currentValue: event.loaded,
+                maxValue: event.total
+              }
+            })
+          },
+          cancelToken: new CancelToken((c) => {
+            store.commit('base/ADD_UPLOAD_CANCLE', c)
+          })
+        })
+          .then(res => {
+            console.log(res)
             store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
             if (Object.keys(store.state.base.uploadingList).length === 0) {
               store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
             }
+            store.dispatch('group/getFileList', this.groupId)
           })
-
-        // 快传url
-        const fastUrl = `${uploadAddress}/api/v1/upload/try_fast`
-        // upload url
-        const uploadUrl = `${uploadAddress}/api/v1/upload`
-        // 全量hash
-        let allHash = ''
-
-        // 监听发送
-        const objNums = { nums: 0 }
-        const watchNums = new Proxy(objNums, {
-          get: (obj, prop) => {
-            return obj[prop]
-          },
-          set: (obj, prop, value) => {
-            if (prop === 'nums') {
-              obj[prop] = value
-              if (value === 2) {
-                console.log('开始发送全量hash', allHash)
-                axios.post(fastUrl, qs.stringify({
-                  file_hash: allHash
-                }), {
-                  headers: {
-                    authorization: uploadAuthorization
-                  }
-                })
-                  .then(res => {
-                    console.log(res)
-                    store.commit('base/SET_UPLOADING_LIST', {
-                      key: `${file.name}-${currentPath}`,
-                      value: {
-                        fileName: file.name,
-                        fileSize: file.size,
-                        path: currentPath,
-                        currentValue: file.size,
-                        maxValue: file.size
-                      }
-                    })
-                    store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
-                    if (Object.keys(store.state.base.uploadingList).length === 0) {
-                      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
-                    }
-                    store.dispatch('base/getFileList')
-                  })
-                  .catch((e) => {
-                    const data = e.response.data
-                    console.log(data)
-                    if (data.message === 'conflict error') {
-                      console.log('该目录已经有该文件')
-                      notyf.error('该目录已经有该文件')
-                      store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
-                      if (Object.keys(store.state.base.uploadingList).length === 0) {
-                        store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
-                      }
-                    } else if (data.message === 'file not found') {
-                      // 发送文件
-                      console.log('开始发送文件')
-                      if (file.size < 104857600) {
-                        console.log('upload')
-                        uploadRequest(uploadAddress, uploadAuthorization, param, file.name, file.size, currentPath)
-                      } else {
-                        console.log('分块上传')
-                        multipartUpload(uploadAddress, uploadAuthorization, file, file.size, file.name, currentPath)
-                      }
-                    } else {
-                      notyf.error('文件上传失败')
-                      store.commit('base/DELETE_UPLOADING_LIST', `${file.name}-${currentPath}`)
-                      if (Object.keys(store.state.base.uploadingList).length === 0) {
-                        store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
-                      }
-                    }
-                  })
-              }
-            }
-            return true
-          }
-        })
-
-        // 计算全量hash
-        const fileAllHashWorker = new HashWorker()
-        fileAllHashWorker.postMessage(file)
-        fileAllHashWorker.onmessage = (e) => {
-          allHash = e.data
-          console.log('全量hash: ', allHash)
-          watchNums.nums++
-        }
-
-        // 计算抽样hash
-        console.log('开始抽样hash 计算')
-        const fileSize = file.size
-        const offset = 5 * 1024 * 1024
-        const chunks = []
-        let cur = 0
-        while (cur < fileSize) {
-          // 最后一块全部
-          if (cur + offset >= fileSize) {
-            chunks.push(file.slice(cur, fileSize))
-          } else {
-            // 前面部分前后各10字节
-            const end = cur + offset
-            chunks.push(file.slice(cur, cur + 10))
-            chunks.push(file.slice(end - 10, end))
-          }
-          cur += offset
-        }
-
-        const fileReader2 = new FileReader()
-        fileReader2.readAsArrayBuffer(new Blob(chunks))
-        fileReader2.onload = async function () {
-          const fileSamplingHash = sha256(fileReader2.result)
-          console.log('抽样hash: ', fileSamplingHash)
-
-          // 快速上传接口
-          console.log('快速上传：', fastUrl, uploadAuthorization)
-          axios.post(fastUrl, qs.stringify({
-            file_sampling_hash: fileSamplingHash
-          }), {
-            headers: {
-              authorization: uploadAuthorization
+          .catch(e => {
+            if (e.toString() !== 'Cancel') {
+              console.log(e)
+              console.log(e.response)
+              store.dispatch('user/signOut')
             }
           })
-            .then(res => {
-              console.log(res)
-              if (res.data.message === 'find sampling hash, need file total hash') {
-                // 发送全量hash
-                console.log('准备发送全量hash')
-                watchNums.nums++
-              }
-            })
-            .catch((e) => {
-              const data = e.response.data
-              console.log(data)
-              if (data.message === 'file not found') {
-                // 发送文件
-                console.log('开始发送文件')
-                if (file.size < 104857600) {
-                  console.log('upload')
-                  uploadRequest(uploadAddress, uploadAuthorization, param, file.name, file.size, currentPath)
-                } else {
-                  console.log('分块上传')
-                  multipartUpload(uploadAddress, uploadAuthorization, file, file.size, file.name, currentPath)
-                }
-              } else {
-                notyf.error('文件上传失败')
-              }
-            })
-        }
       }
     },
-    downloadFileByA (name, blob) {
-      const a = document.createElement('a')
-      a.download = name
-      a.href = blob
-      a.click()
-    },
+    downloadFileByA,
     async downloadFile (fileId, fileName, fileSize) {
       // 显示下载列表
       const currentPath = this.directory
 
-      if (`${BigInt(fileId)}-${currentPath}` in store.state.base.downloadingList) {
+      if (`${getBigInt(fileId)}-${currentPath}` in store.state.base.downloadingList) {
         console.log('该文件正在下载中')
         notyf.error('该文件正在下载中')
         return
@@ -516,7 +362,7 @@ export default {
         this.showWhat = false
       })
       store.commit('base/SET_DOWNLOADING_LIST', {
-        key: `${BigInt(fileId)}-${currentPath}`,
+        key: `${getBigInt(fileId)}-${currentPath}`,
         value: {
           fileName,
           fileSize: fileSize,
@@ -529,7 +375,7 @@ export default {
       // 获取下载地址接口
       let downloadAddress = ''
       let downloadAuthorization = ''
-      await axios.get(`/api/v1/user/download_address?file_id=${BigInt(fileId)}&file_name=${fileName}&directory=${this.directory}`, {
+      await axios.get(`/api/v1/user/group/download_address?group_id=${this.groupId}&file_id=${getBigInt(fileId)}&file_name=${fileName}&directory=${this.directory}`, {
         timeout: 5000
       })
         .then(res => {
@@ -542,7 +388,7 @@ export default {
           if (e.message.indexOf('timeout') !== -1) {
             notyf.error('下载地址请求失败')
           }
-          store.commit('base/DELETE_DOWNLOADING_LIST', `${BigInt(fileId)}-${currentPath}`)
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${getBigInt(fileId)}-${currentPath}`)
           if (Object.keys(store.state.base.downloadingList).length === 0) {
             store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
           }
@@ -552,14 +398,14 @@ export default {
 
       // 使用axios
       await axios.request({
-        url: `${downloadAddress}/api/v1/download?file_id=${BigInt(fileId)}`,
+        url: `${downloadAddress}/api/v1/download?file_id=${getBigInt(fileId)}`,
         method: 'GET',
         headers: {
           authorization: downloadAuthorization
         },
         onDownloadProgress: (event) => {
           store.commit('base/SET_DOWNLOADING_LIST', {
-            key: `${BigInt(fileId)}-${currentPath}`,
+            key: `${getBigInt(fileId)}-${currentPath}`,
             value: {
               fileName,
               fileSize: fileSize,
@@ -576,7 +422,7 @@ export default {
       })
         .then(res => {
           console.log(res)
-          store.commit('base/DELETE_DOWNLOADING_LIST', `${BigInt(fileId)}-${currentPath}`)
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${getBigInt(fileId)}-${currentPath}`)
           if (Object.keys(store.state.base.downloadingList).length === 0) {
             store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
           }
@@ -590,7 +436,7 @@ export default {
             console.log(e.response)
             store.dispatch('user/signOut')
           }
-          store.commit('base/DELETE_DOWNLOADING_LIST', `${BigInt(fileId)}-${currentPath}`)
+          store.commit('base/DELETE_DOWNLOADING_LIST', `${getBigInt(fileId)}-${currentPath}`)
           if (Object.keys(store.state.base.downloadingList).length === 0) {
             store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
           }
@@ -613,16 +459,17 @@ export default {
     async createFolder () {
       console.log('create folder')
       if (this.inputFileName === '') return
-      axios.post('/api/v1/user/file_list', qs.stringify({
+      axios.post('/api/v1/user/group/file_list', qs.stringify({
         csrf_token: this.token,
         directory: this.directory,
+        group_id: this.groupId,
         name: this.inputFileName
       }), {
         timeout: 5000
       })
         .then(res => {
           console.log(res)
-          store.dispatch('base/getFileList')
+          store.dispatch('group/getFileList', this.groupId)
         })
         .catch((e) => {
           if (e.message.indexOf('timeout') !== -1) {
@@ -639,12 +486,12 @@ export default {
     async deleteFile () {
       console.log('delete file')
       console.log(this.deleteFileName, this.directory, this.token)
-      await axios.delete(`/api/v1/user/file_list?name=${this.deleteFileName}&directory=${this.directory}&csrf_token=${this.token}`, {
+      await axios.delete(`/api/v1/user/group/file_list?group_id=${this.groupId}&name=${this.deleteFileName}&directory=${this.directory}&csrf_token=${this.token}`, {
         timeout: 5000
       })
         .then(res => {
           console.log(res)
-          store.dispatch('base/getFileList')
+          store.dispatch('group/getFileList', this.groupId)
         })
         .catch((e) => {
           if (e.message.indexOf('timeout') !== -1) {
@@ -663,24 +510,32 @@ export default {
   },
   watch: {
     $route (to, from) {
+      // console.log(to.path)
+      // if (to.path === '/user/group-home') {
+      store.commit('group/SET_GROUP_ROUTE', this.$route.fullPath)
       const path = to.query.path
+      this.groupId = to.query.groupId
       if (path) {
-        store.commit('base/SET_CURRENT_DIRECTORY', path)
+        store.commit('group/SET_CURRENT_DIRECTORY', path)
       } else {
-        store.commit('base/SET_CURRENT_DIRECTORY', '/')
+        store.commit('group/SET_CURRENT_DIRECTORY', '/')
       }
-      store.dispatch('base/getFileList')
+      store.dispatch('group/getFileList', this.groupId)
       this.initFileInput()
+      // }
     }
   },
   mounted () {
+    store.commit('group/SET_GROUP_ROUTE', this.$route.fullPath)
     const path = this.$route.query.path
+    this.groupId = this.$route.query.groupId
+    this.groupName = this.$route.query.groupName
     if (path) {
-      store.commit('base/SET_CURRENT_DIRECTORY', path)
+      store.commit('group/SET_CURRENT_DIRECTORY', path)
     } else {
-      store.commit('base/SET_CURRENT_DIRECTORY', '/')
+      store.commit('group/SET_CURRENT_DIRECTORY', '/')
     }
-    store.dispatch('base/getFileList')
+    store.dispatch('group/getFileList', this.groupId)
     this.initFileInput()
   }
 }
@@ -714,39 +569,24 @@ export default {
   font-size: 15px;
 }
 
-.user-home {
+.group-home {
   height: 100%;
-  .user-home-nav {
+  .group-home-nav {
     display: flex;
     flex-direction: column;
     color: $nav-color;
     font-size: 12px;
     cursor: default;
 
-    .user-home-buttons {
-      height: $buttons-height;
-      padding: px2rem(11) px2rem(10);
-      box-sizing: border-box;
+    .group-home-buttons {
+      @include buttonList();
 
-      .user-home-button-icon {
-        height: px2rem(33);
-        font-size: 13px;
-        margin: 0 px2rem(5);
-        vertical-align: baseline;
-        border-radius: $default-border-radius;
-        padding: 0 px2rem(10);
-        cursor: pointer;
+      .group-home-button-item:nth-child(1) {
+        @include buttonItem1();
       }
 
-      .user-home-button-icon:nth-child(1) {
-        background: $blue;
-        color: $white;
-      }
-
-      .user-home-button-icon:nth-child(n + 2) {
-        background: $white;
-        border: 1px solid $blue;
-        color: $blue;
+      .group-home-button-item:nth-child(n + 2) {
+        @include buttonItem2();
       }
     }
 
@@ -754,12 +594,13 @@ export default {
       height: $bread-height;
       line-height: $bread-height;
       padding-right: px2rem(16);
-      border-bottom: 1px solid #f2f6fd;
+      @include borderBottom();
 
       a {
         color: $nav-color;
         padding-left: px2rem(16);
         position: relative;
+        font-size: 13.5px;
       }
 
       a:nth-child(n + 2)::before {
@@ -770,8 +611,7 @@ export default {
     }
   }
 
-  .user-home-list {
-    height: calc(100% - #{$nav-height});
+  .group-home-list {
     overflow-y: auto;
     color: $nav-color;
     font-size: 12px;
@@ -779,8 +619,8 @@ export default {
     display: flex;
     flex-direction: column;
 
-    .user-home-item {
-      border-bottom: 1px solid #f2f6fd;
+    .group-home-item {
+      @include borderBottom();
       box-sizing: border-box;
 
       .item-span:nth-child(1) {

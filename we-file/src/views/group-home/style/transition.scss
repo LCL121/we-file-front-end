@@ -1,0 +1,14 @@
+.progress-transition-enter,
+.progress-transition-leave-to {
+  transform: translate3d(0, 100%, 0);
+}
+
+.progress-transition-enter-active,
+.progress-transition-leave-active {
+  transition: transform .5s;
+}
+
+.progress-transition-enter-to,
+.progress-transition-leave {
+  transform: translate3d(0, 0, 0);
+}

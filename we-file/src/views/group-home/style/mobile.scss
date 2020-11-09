@@ -1,11 +1,11 @@
 @import '@/style/index.scss';
 @import "./variables.scss";
 
-$user-home-item-height: px2rem(70);
+$group-home-item-height: px2rem(70);
 
 // 360px
 @media screen and (max-width:400px) {
-  .user-home-button-item .icon {
+  .group-home-button-item .icon {
     display: none !important;
   }
 }
@@ -19,14 +19,14 @@ $user-home-item-height: px2rem(70);
     display: none;
   }
 
-  .user-home-list {
+  .group-home-list {
     height: calc(100vh - #{$title-height + $buttons-height + $bread-height});
 
-    .user-home-item {
+    .group-home-item {
       display: flex;
       position: relative;
-      line-height: $user-home-item-height;
-      height: $user-home-item-height;
+      line-height: $group-home-item-height;
+      height: $group-home-item-height;
 
       .item-span:nth-child(1) {
         width: px2rem(400);

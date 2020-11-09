@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '@/layout/home/Home.vue'
-import User from '@/layout/user/User.vue'
+import Home from '@/layout/home'
+import User from '@/layout/user'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
@@ -19,12 +19,12 @@ const routes = [
       {
         path: 'signin',
         name: 'SignIn',
-        component: () => import(/* webpackChunkName: "signin" */ '@/views/signin/SignIn.vue')
+        component: () => import(/* webpackChunkName: "signin" */ '@/views/signin')
       },
       {
         path: 'signup',
         name: 'SignUp',
-        component: () => import(/* webpackChunkName: "signup" */ '@/views/signup/SignUp.vue')
+        component: () => import(/* webpackChunkName: "signup" */ '@/views/signup')
       }
     ]
   },
@@ -37,19 +37,34 @@ const routes = [
       {
         path: 'user-home',
         name: 'UserHome',
-        component: () => import(/* webpackChunkName: "user-home" */ '@/views/user-home/UserHome.vue')
+        component: () => import(/* webpackChunkName: "user-home" */ '@/views/user-home')
       },
       {
         path: 'user-details',
-        name: 'Userdetails',
-        component: () => import(/* webpackChunkName: "user-details" */ '@/views/user-details/Userdetails.vue')
+        name: 'UserDetails',
+        component: () => import(/* webpackChunkName: "user-details" */ '@/views/user-details')
+      },
+      {
+        path: 'user-group',
+        name: 'UserGroup',
+        component: () => import(/* webpackChunkName: "user-group" */ '@/views/user-group')
+      },
+      {
+        path: 'group-home',
+        name: 'GroupHome',
+        component: () => import(/* webpackChunkName: "group-home" */ '@/views/group-home')
+      },
+      {
+        path: 'group-details',
+        name: 'GroupDetails',
+        component: () => import(/* webpackChunkName: "group-details" */ '@/views/group-details')
       }
     ]
   },
   {
     path: '/about',
     name: 'About',
-    component: () => import(/* webpackChunkName: "about" */ '@/views/about/About.vue')
+    component: () => import(/* webpackChunkName: "about" */ '@/views/about')
   },
   {
     path: '*',

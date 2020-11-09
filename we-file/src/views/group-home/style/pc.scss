@@ -1,15 +1,15 @@
 @import '@/style/index.scss';
 @import "./style/variables.scss";
 
-$user-home-item-height: px2rem(44);
+$group-home-item-height: px2rem(44);
 
 @media screen and (min-width:801px) {
-  .user-home-nav {
+  .group-home-nav {
     height: $nav-height;
 
-    .user-home-buttons {
+    .group-home-buttons {
 
-      .user-home-button-item {
+      .group-home-button-item {
         min-width: px2rem(84);
       }
     }
@@ -42,13 +42,13 @@ $user-home-item-height: px2rem(44);
     }
   }
 
-  .user-home-list {
+  .group-home-list {
     height: calc(100vh - #{$title-height + $nav-height});
 
-    .user-home-item {
+    .group-home-item {
       display: flex;
-      line-height: $user-home-item-height;
-      height: $user-home-item-height;
+      line-height: $group-home-item-height;
+      height: $group-home-item-height;
 
       .item-span {
         flex: 1;

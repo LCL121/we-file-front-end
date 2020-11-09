@@ -2,6 +2,7 @@ import axios from 'axios'
 import qs from 'qs'
 import store from '@/store'
 import router from '@/router'
+import { getBigInt } from '@/utils/utils'
 
 const state = {
   token: '',
@@ -31,7 +32,7 @@ const actions = {
               return
             }
             const data = res.data
-            data.user_id = BigInt(data.user_id).toString()
+            data.user_id = getBigInt(data.user_id)
             localStorage.setItem('userInfo', JSON.stringify(data))
 
             const {
@@ -82,7 +83,7 @@ const actions = {
               return
             }
             const data = res.data
-            data.user_id = BigInt(data.user_id).toString()
+            data.user_id = getBigInt(data.user_id)
             localStorage.setItem('userInfo', JSON.stringify(data))
 
             const {
@@ -117,24 +118,11 @@ const actions = {
 
   // 退出
   async signOut ({ commit, state }) {
-    const uploadCancleList = store.state.base.uploadCancleList
-    const downloadCancleList = store.state.base.downloadCancleList
-    if (uploadCancleList.length !== 0) {
-      for (const uploadCancle of uploadCancleList) {
-        uploadCancle()
-      }
-      store.commit('base/DELETE_ALL_UPLOADING_LIST')
-      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
-      store.commit('base/DELETE_ALL_UPLOAD_CANCLE')
-    }
-    if (downloadCancleList.length !== 0) {
-      for (const downloadCancle of downloadCancleList) {
-        downloadCancle()
-      }
-      store.commit('base/DELETE_ALL_DOWNLOADING_LIST')
-      store.commit('base/CHANGE_MY_PROGRESS_STATUS', false)
-      store.commit('base/DELETE_ALL_DOWNLOAD_CANCLE')
-    }
+    // 清理base
+    store.commit('base/CLEAR_ALL')
+    // 清理group
+    store.commit('group/CLEAR_ALL')
+    // 清理user
     localStorage.removeItem('userInfo')
     commit('SET_EMAIL', '')
     commit('SET_NAME', '')
