@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "test:api": "vue-cli-service serve --mode testapi",
+    "test:mobile": "vue-cli-service serve --mode testmobile",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "dev-inspect": "vue-cli-service inspect > inspect_dev_output.js",
