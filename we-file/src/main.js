@@ -5,8 +5,10 @@ import store from './store'
 import './directive'
 import './icon/iconfont'
 
+Vue.config.productionTip = false
+
 if (process.env.VUE_APP_TESTAPI) {
-  import('./tryFiles/tryAPI')
+  import('./testFiles/tryAPI')
     .then((module) => {
       console.log('已开启Test API 模式！')
       module.tryAPI()
@@ -14,7 +16,13 @@ if (process.env.VUE_APP_TESTAPI) {
     })
 }
 
-Vue.config.productionTip = false
+if (process.env.VUE_APP_TESTMOBILE) {
+  import('./testFiles/testMobile')
+    .then(module => {
+      console.log('已开启Test Moble 模式！')
+      module.testMobile()
+    })
+}
 
 // <= 500px 手机; <= 800px 平板; > 800px 电脑端
 // <= 800px 通过rem; > 800px 通过媒体查询;

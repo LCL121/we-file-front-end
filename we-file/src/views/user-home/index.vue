@@ -708,8 +708,6 @@ export default {
     color: $nav-color;
     font-size: 12px;
     cursor: default;
-    display: flex;
-    flex-direction: column;
 
     .user-home-item {
       @include borderBottom();
