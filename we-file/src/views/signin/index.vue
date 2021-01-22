@@ -12,7 +12,6 @@
       <input
         type="email"
         id="email"
-        v-focus
         placeholder="邮箱"
         autocomplete
         required
@@ -61,8 +60,11 @@ export default {
       return this.$refs.password.validity.valid
     },
     clearMessage () {
-      if (!this.emailState() || !this.passwordState()) {
-        this.message = '请按格式输入信息'
+      if (!this.emailState()) {
+        this.message = '请输入正确格式的邮箱'
+        return false
+      } else if (!this.passwordState()) {
+        this.message = '请输入正确格式的密码'
         return false
       } else {
         this.message = ''

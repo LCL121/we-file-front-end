@@ -16,7 +16,6 @@
         pattern=".{1,64}"
         autocomplete
         required
-        v-focus
         ref="name"
         v-model="name"
         @blur="clearMessage"
@@ -49,7 +48,7 @@
         @blur="clearMessage"
       >
     </div>
-    <div class="fm-input code-input">
+    <div class="fm-input code-input" v-if="false">
       <label for="code"></label>
       <input
         type="text"
@@ -74,10 +73,17 @@ import store from '@/store'
 export default {
   name: 'SignUp',
   data () {
+    // return {
+    //   name: 'lcl',
+    //   password: '123abcABC',
+    //   email: '1391436522@qq.com',
+    //   code: '',
+    //   message: ''
+    // }
     return {
-      name: 'lcl',
-      password: '123abcABC',
-      email: '1391436522@qq.com',
+      name: '',
+      password: '',
+      email: '',
       code: '',
       message: ''
     }
@@ -97,13 +103,17 @@ export default {
       // return this.$refs.code.validity.valid
     },
     clearMessage () {
-      if (
-        !this.nameState() ||
-        !this.emailState() ||
-        !this.passwordState() ||
-        !this.codeState()
-      ) {
-        this.message = '请按格式输入信息'
+      if (!this.nameState()) {
+        this.message = '请输入正确格式的用户名'
+        return false
+      } else if (!this.emailState()) {
+        this.message = '请输入正确格式的邮箱'
+        return false
+      } else if (!this.passwordState()) {
+        this.message = '请输入正确格式的密码'
+        return false
+      } else if (!this.codeState()) {
+        this.message = '请输入正确格式的验证码'
         return false
       } else {
         this.message = ''
