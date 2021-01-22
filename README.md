@@ -11,7 +11,7 @@
    - 借鉴Vue3.0 的Proxy 侦听的思想，解决Web Worker 和网络请求的并发问题以及分块上传时实时展示总上传进度的问题
    - 使用抽样hash，加快检测出不存在的文件
    - 对于大文件进行分块上传
-   - <img src="./img/WeFile文件上传.png" style="zoom:80%;" />
+   - <img src="./img/WeFile文件上传.png" style="zoom:80%;" alt="文件上传流程图"/>
 4. 使用 localStorage 完成自动登录功能 
 5. 通过URL 的query，解决面包屑导航
 5. 三端适配
