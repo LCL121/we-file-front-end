@@ -35,10 +35,9 @@
             :class="{selected: index === 2}"
             @click.native="changeSeleted()"
           >共享小组</router-link>
-          <router-link
-            to="/signin"
-            @click.native="judgeisSignOut"
-          >退出登录</router-link>
+          <a
+            @click="judgeisSignOut"
+          >退出登录</a>
         </nav>
       </transition>
       <div class="user-main-view">
@@ -62,7 +61,6 @@
 
 <script>
 import store from '@/store'
-import { mapState } from 'vuex'
 import popup from '@/components/Popup'
 
 export default {

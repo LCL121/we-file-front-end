@@ -20,6 +20,7 @@ $selected-color: #000;
       cursor: default;
       padding: 0 px2rem(50);
       box-sizing: border-box;
+      user-select: none;
 
       .nav-button {
         position: absolute;

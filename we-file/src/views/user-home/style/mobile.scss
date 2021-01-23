@@ -27,6 +27,7 @@ $user-home-item-height: px2rem(70);
       position: relative;
       line-height: $user-home-item-height;
       height: $user-home-item-height;
+      user-select: none;
 
       .item-span:nth-child(1) {
         width: px2rem(400);

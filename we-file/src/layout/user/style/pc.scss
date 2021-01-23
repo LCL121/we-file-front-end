@@ -42,6 +42,7 @@ $selected-bgcolor: #fff;
           @include textCenter(px2rem(40));
           margin: px2rem(15) auto;
           border-radius: $default-border-radius;
+          cursor: pointer;
         }
 
         a:hover {

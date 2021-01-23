@@ -14,11 +14,13 @@ export const getFileIcon = (isDirectory, fileName) => {
     const suffix = /.*\.(.*)/.exec(fileName)[1]
     switch (suffix) {
       case 'xlsx':
-        return '<use xlink:href="#icon-file"></use>'
+        return '<use xlink:href="#icon-xlsx"></use>'
+      case 'pptx':
       case 'ppt':
         return '<use xlink:href="#icon-ppt"></use>'
       case 'doc':
       case 'docx':
+      case 'rtf':
         return '<use xlink:href="#icon-word"></use>'
       case 'mp3':
       case 'wav':
