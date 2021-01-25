@@ -2,6 +2,8 @@
 
 基于Vue2.x全家桶、Sass预处理器，使用了三端适配、并发控制、大文件分块上传、weinre 真机调试等技术，实现了一个文件共享系统。
 
+项目展示地址：<a href="http://wefile.leichenlong.com/" target="_blank">http://wefile.leichenlong.com/</a>
+
 ## 功能介绍
 
 1. 对于跨域的解决
